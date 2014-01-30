@@ -1,9 +1,0 @@
-
-class NewNet_ONSAvril extends ONSAvril
-    HideDropDown
-	CacheExempt;
-
-DefaultProperties
-{
-    PickupClass=Class'UTCompv17a.NewNet_ONSAvrilPickup'
-}
