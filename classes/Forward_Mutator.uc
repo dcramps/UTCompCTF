@@ -180,8 +180,8 @@ function PostBeginPlay()
 	else
 		Level.Game.GameRulesModifiers.AddGameRules(G);
 
-    Level.Game.DefaultPlayerClassName="utcompv17asrc.Forward_Pawn";
-    Level.Game.PlayerControllerClassName="utcompv17asrc.Forward_xPlayer";
+    Level.Game.DefaultPlayerClassName="UTCompCTF.Forward_Pawn";
+    Level.Game.PlayerControllerClassName="UTCompCTF.Forward_xPlayer";
 }
 
 function ModifyPlayer(Pawn Other)
@@ -387,27 +387,27 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     }
     else if(Other.IsA('MiniHealthPack') && Other.Class == class'MiniHealthPack')
     {
-        ReplaceWith(Other,"utcompv17asrc.Forward_MiniHealthPack");
+        ReplaceWith(Other,"UTCompCTF.Forward_MiniHealthPack");
         return false;
     }
     else if(Other.IsA('HealthPack') && Other.Class == class'HealthPack')
     {
-        ReplaceWith(Other,"utcompv17asrc.Forward_HealthPack");
+        ReplaceWith(Other,"UTCompCTF.Forward_HealthPack");
         return false;
     }
     else if(Other.IsA('SuperHealthPack') && Other.Class == class'SuperHealthPack')
     {
-        ReplaceWith(Other,"utcompv17asrc.Forward_SuperHealthPack");
+        ReplaceWith(Other,"UTCompCTF.Forward_SuperHealthPack");
         return false;
     }
     else if(Other.IsA('ShieldPack') && Other.Class == class'ShieldPack')
     {
-        ReplaceWith(Other,"utcompv17asrc.Forward_ShieldPack");
+        ReplaceWith(Other,"UTCompCTF.Forward_ShieldPack");
         return false;
     }
     else if(Other.IsA('SuperShieldPack') && Other.Class == class'SuperShieldPack')
     {
-        ReplaceWith(Other,"utcompv17asrc.Forward_SuperShieldPack");
+        ReplaceWith(Other,"UTCompCTF.Forward_SuperShieldPack");
         return false;
     }
     else if ( GameReplicationInfo(Other) != None )
@@ -554,57 +554,57 @@ DefaultProperties
      ReplacedWeaponClassNames(10)="Onslaught.ONSMineLayer"
      ReplacedWeaponClassNames(11)="Onslaught.ONSGrenadeLauncher"
 
-     WeaponClassNames(0)="utcompv17asrc.Forward_NewNet_ShockRifle"
-     WeaponClassNames(1)="utcompv17asrc.Forward_NewNet_LinkGun"
-     WeaponClassNames(2)="utcompv17asrc.Forward_NewNet_MiniGun"
-     WeaponClassNames(3)="utcompv17asrc.Forward_NewNet_FlakCannon"
-     WeaponClassNames(4)="utcompv17asrc.Forward_NewNet_RocketLauncher"
-     WeaponClassNames(5)="utcompv17asrc.Forward_NewNet_SniperRifle"
-     WeaponClassNames(6)="utcompv17asrc.Forward_NewNet_BioRifle"
-     WeaponClassNames(7)="utcompv17asrc.Forward_NewNet_AssaultRifle"
-     WeaponClassNames(8)="utcompv17asrc.Forward_NewNet_SniperRifle"
-     WeaponClassNames(9)="UTCompv17asrc.NewNet_ONSAVRiL"
-     WeaponClassNames(10)="UTCompv17asrc.NewNet_ONSMineLayer"
-     WeaponClassNames(11)="UTCompv17asrc.NewNet_ONSGrenadeLauncher"
+     WeaponClassNames(0)="UTCompCTF.Forward_NewNet_ShockRifle"
+     WeaponClassNames(1)="UTCompCTF.Forward_NewNet_LinkGun"
+     WeaponClassNames(2)="UTCompCTF.Forward_NewNet_MiniGun"
+     WeaponClassNames(3)="UTCompCTF.Forward_NewNet_FlakCannon"
+     WeaponClassNames(4)="UTCompCTF.Forward_NewNet_RocketLauncher"
+     WeaponClassNames(5)="UTCompCTF.Forward_NewNet_SniperRifle"
+     WeaponClassNames(6)="UTCompCTF.Forward_NewNet_BioRifle"
+     WeaponClassNames(7)="UTCompCTF.Forward_NewNet_AssaultRifle"
+     WeaponClassNames(8)="UTCompCTF.Forward_NewNet_SniperRifle"
+     WeaponClassNames(9)="UTCompCTF.NewNet_ONSAVRiL"
+     WeaponClassNames(10)="UTCompCTF.NewNet_ONSMineLayer"
+     WeaponClassNames(11)="UTCompCTF.NewNet_ONSGrenadeLauncher"
 
-     AltWeaponClassNames(0)="utcompv17asrc.Forward_UTComp_ShockRifle"
-     AltWeaponClassNames(1)="utcompv17asrc.Forward_UTComp_LinkGun"
-     AltWeaponClassNames(2)="utcompv17asrc.Forward_UTComp_MiniGun"
-     AltWeaponClassNames(3)="utcompv17asrc.Forward_UTComp_FlakCannon"
-     AltWeaponClassNames(4)="utcompv17asrc.Forward_UTComp_RocketLauncher"
-     AltWeaponClassNames(5)="utcompv17asrc.Forward_UTComp_SniperRifle"
-     AltWeaponClassNames(6)="utcompv17asrc.Forward_UTComp_BioRifle"
-     AltWeaponClassNames(7)="utcompv17asrc.Forward_UTComp_AssaultRifle"
-     AltWeaponClassNames(8)="utcompv17asrc.Forward_UTComp_SniperRifle"
+     AltWeaponClassNames(0)="UTCompCTF.Forward_UTComp_ShockRifle"
+     AltWeaponClassNames(1)="UTCompCTF.Forward_UTComp_LinkGun"
+     AltWeaponClassNames(2)="UTCompCTF.Forward_UTComp_MiniGun"
+     AltWeaponClassNames(3)="UTCompCTF.Forward_UTComp_FlakCannon"
+     AltWeaponClassNames(4)="UTCompCTF.Forward_UTComp_RocketLauncher"
+     AltWeaponClassNames(5)="UTCompCTF.Forward_UTComp_SniperRifle"
+     AltWeaponClassNames(6)="UTCompCTF.Forward_UTComp_BioRifle"
+     AltWeaponClassNames(7)="UTCompCTF.Forward_UTComp_AssaultRifle"
+     AltWeaponClassNames(8)="UTCompCTF.Forward_UTComp_SniperRifle"
      AltWeaponClassNames(9)="Onslaught.ONSAVRiL"
      AltWeaponClassNames(10)="Onslaught.ONSMineLayer"
      AltWeaponClassNames(11)="Onslaught.ONSGrenadeLauncher"
 
-     NewNetWeaponClassNames(0)="UTCompv17asrc.NewNet_ShockRifle"
-     NewNetWeaponClassNames(1)="UTCompv17asrc.NewNet_LinkGun"
-     NewNetWeaponClassNames(2)="UTCompv17asrc.NewNet_MiniGun"
-     NewNetWeaponClassNames(3)="UTCompv17asrc.NewNet_FlakCannon"
-     NewNetWeaponClassNames(4)="UTCompv17asrc.NewNet_RocketLauncher"
-     NewNetWeaponClassNames(5)="UTCompv17asrc.NewNet_SniperRifle"
-     NewNetWeaponClassNames(6)="UTCompv17asrc.NewNet_BioRifle"
-     NewNetWeaponClassNames(7)="UTCompv17asrc.NewNet_AssaultRifle"
-     NewNetWeaponClassNames(8)="UTCompv17asrc.NewNet_ClassicSniperRifle"
-     NewNetWeaponClassNames(9)="UTCompv17asrc.NewNet_ONSAVRiL"
-     NewNetWeaponClassNames(10)="UTCompv17asrc.NewNet_ONSMineLayer"
-     NewNetWeaponClassNames(11)="UTCompv17asrc.NewNet_ONSGrenadeLauncher"
+     NewNetWeaponClassNames(0)="UTCompCTF.NewNet_ShockRifle"
+     NewNetWeaponClassNames(1)="UTCompCTF.NewNet_LinkGun"
+     NewNetWeaponClassNames(2)="UTCompCTF.NewNet_MiniGun"
+     NewNetWeaponClassNames(3)="UTCompCTF.NewNet_FlakCannon"
+     NewNetWeaponClassNames(4)="UTCompCTF.NewNet_RocketLauncher"
+     NewNetWeaponClassNames(5)="UTCompCTF.NewNet_SniperRifle"
+     NewNetWeaponClassNames(6)="UTCompCTF.NewNet_BioRifle"
+     NewNetWeaponClassNames(7)="UTCompCTF.NewNet_AssaultRifle"
+     NewNetWeaponClassNames(8)="UTCompCTF.NewNet_ClassicSniperRifle"
+     NewNetWeaponClassNames(9)="UTCompCTF.NewNet_ONSAVRiL"
+     NewNetWeaponClassNames(10)="UTCompCTF.NewNet_ONSMineLayer"
+     NewNetWeaponClassNames(11)="UTCompCTF.NewNet_ONSGrenadeLauncher"
 
-     UTCompWeaponClassNames(0)="UTCompv17asrc.UTComp_ShockRifle"
-     UTCompWeaponClassNames(1)="UTCompv17asrc.UTComp_LinkGun"
-     UTCompWeaponClassNames(2)="UTCompv17asrc.UTComp_MiniGun"
-     UTCompWeaponClassNames(3)="UTCompv17asrc.UTComp_FlakCannon"
-     UTCompWeaponClassNames(4)="UTCompv17asrc.UTComp_RocketLauncher"
-     UTCompWeaponClassNames(5)="UTCompv17asrc.UTComp_SniperRifle"
-     UTCompWeaponClassNames(6)="UTCompv17asrc.UTComp_BioRifle"
-     UTCompWeaponClassNames(7)="UTCompv17asrc.UTComp_AssaultRifle"
-     UTCompWeaponClassNames(8)="UTCompv17asrc.UTComp_ClassicSniperRifle"
-     UTCompWeaponClassNames(9)="UTCompv17asrc.UTComp_ONSAVRiL"
-     UTCompWeaponClassNames(10)="UTCompv17asrc.UTComp_ONSMineLayer"
-     UTCompWeaponClassNames(11)="UTCompv17asrc.UTComp_ONSGrenadeLauncher"
+     UTCompWeaponClassNames(0)="UTCompCTF.UTComp_ShockRifle"
+     UTCompWeaponClassNames(1)="UTCompCTF.UTComp_LinkGun"
+     UTCompWeaponClassNames(2)="UTCompCTF.UTComp_MiniGun"
+     UTCompWeaponClassNames(3)="UTCompCTF.UTComp_FlakCannon"
+     UTCompWeaponClassNames(4)="UTCompCTF.UTComp_RocketLauncher"
+     UTCompWeaponClassNames(5)="UTCompCTF.UTComp_SniperRifle"
+     UTCompWeaponClassNames(6)="UTCompCTF.UTComp_BioRifle"
+     UTCompWeaponClassNames(7)="UTCompCTF.UTComp_AssaultRifle"
+     UTCompWeaponClassNames(8)="UTCompCTF.UTComp_ClassicSniperRifle"
+     UTCompWeaponClassNames(9)="UTCompCTF.UTComp_ONSAVRiL"
+     UTCompWeaponClassNames(10)="UTCompCTF.UTComp_ONSMineLayer"
+     UTCompWeaponClassNames(11)="UTCompCTF.UTComp_ONSGrenadeLauncher"
 
 
      bAddtoServerPackages=true

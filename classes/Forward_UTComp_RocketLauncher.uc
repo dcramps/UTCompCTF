@@ -45,6 +45,6 @@ function Projectile SpawnProjectile(Vector Start, Rotator Dir)
 
 DefaultProperties
 {
-    FireModeClass[0] = Class'utcompv17asrc.Forward_UTComp_RocketFire';
-    FireModeClass[1] = Class'utcompv17asrc.Forward_UTComp_RocketMultiFire';
+    FireModeClass[0] = Class'UTCompCTF.Forward_UTComp_RocketFire';
+    FireModeClass[1] = Class'UTCompCTF.Forward_UTComp_RocketMultiFire';
 }

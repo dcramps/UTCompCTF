@@ -15,5 +15,5 @@ event ModeDoFire()
 
 defaultproperties
 {
-     ProjectileClass=Class'UTCompv17asrc.UTComp_ShockProjectile'
+     ProjectileClass=Class'UTCompCTF.UTComp_ShockProjectile'
 }

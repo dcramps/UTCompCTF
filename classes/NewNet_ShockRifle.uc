@@ -271,7 +271,7 @@ simulated function SpawnBeamEffect(vector HitLocation, vector HitNormal, vector 
 
 DefaultProperties
 {
-    FireModeClass(0)=class'UTCompv17asrc.NewNet_ShockBeamFire'
-    FireModeClass(1)=class'UTCompv17asrc.NewNet_ShockProjFire'
-    PickupClass=Class'UTCompv17asrc.NewNet_ShockRiflePickup'
+    FireModeClass(0)=class'UTCompCTF.NewNet_ShockBeamFire'
+    FireModeClass(1)=class'UTCompCTF.NewNet_ShockProjFire'
+    PickupClass=Class'UTCompCTF.NewNet_ShockRiflePickup'
 }

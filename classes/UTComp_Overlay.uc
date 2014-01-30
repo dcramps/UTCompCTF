@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------
 // Part of TeamOverlay by Adam 'Heywood' Booth - heywood@malevolence.com.au
-// altered/recoded by Aaron 'Lotus' Everitt for use in UTCompv17asrc
+// altered/recoded by Aaron 'Lotus' Everitt for use in UTCompCTF
 //-----------------------------------------------------------
 class UTComp_Overlay extends Interaction;
 
@@ -127,7 +127,7 @@ function PostRender( canvas Canvas )
        Canvas.DrawText("This server is running");
        Canvas.StrLen("W", StrLenX3, StrLenY3);
        Canvas.SetPos(TmpX, TmpY+1*(StrLenY3+2.0));
-       Canvas.DrawText("UTComp "$MakeColorCode(class'Hud'.Default.GoldColor)$"1.7asrc"$MakeColorCode(InfoTextColor)$".");
+       Canvas.DrawText("UTComp "$MakeColorCode(class'Hud'.Default.GoldColor)$"CTF 0.1 alpha"$MakeColorCode(InfoTextColor)$".");
        Canvas.SetPos(TmpX, TmpY+3*(StrLenY3+2.0));
        Canvas.DrawText("Press "$MakeColorCode(class'Hud'.Default.GoldColor)$class'GameInfo'.Static.GetKeyBindName("mymenu", BS_xPlayer(ViewportOwner.Actor))$MakeColorCode(InfoTextColor)$" to change");
        Canvas.SetPos(TmpX, TmpY+4*(StrLenY3+2.0));

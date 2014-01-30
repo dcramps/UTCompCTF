@@ -560,7 +560,7 @@ function CreateInventory(string InventoryClassName)
 	local Inventory Inv;
 	local class<Inventory> InventoryClass;
 
-	if(InventoryClassName ~="utcompv17asrc.UTComp_ShieldGun")
+	if(InventoryClassName ~="UTCompCTF.UTComp_ShieldGun")
 	    return;
 
     InventoryClass = Level.Game.BaseMutator.GetInventoryClass(InventoryClassName);
@@ -656,6 +656,6 @@ defaultproperties
      SLOPEJUMP_EXPONENT=5.000000
      SLOPEJUMP_FACTOR=0.510000
      ShieldStrengthMax=200
-     RequiredEquipment(1)="utcompv17asrc.Forward_ShieldGun"
+     RequiredEquipment(1)="UTCompCTF.Forward_ShieldGun"
      SuperHealthMax = 200
 }

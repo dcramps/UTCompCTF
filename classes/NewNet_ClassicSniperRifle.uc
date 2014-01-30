@@ -78,6 +78,6 @@ function NewNet_ServerStartFire(byte Mode, byte ClientTimeStamp, float dt)
 
 DefaultProperties
 {
-     PickupClass=Class'UTCompv17asrc.NewNet_ClassicSniperRiflePickup'
-     FireModeClass(0)=class'UTCompv17asrc.NewNet_ClassicSniperFire'
+     PickupClass=Class'UTCompCTF.NewNet_ClassicSniperRiflePickup'
+     FireModeClass(0)=class'UTCompCTF.NewNet_ClassicSniperFire'
 }

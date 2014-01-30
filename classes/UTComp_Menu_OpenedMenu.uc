@@ -13,13 +13,13 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
    // local mutator mut;
 
-    l_Mode[2].Caption="UTComp Version"$class'Gameinfo'.static.MakeColorCode(GoldColor)$" 1.7asrc";
+    l_Mode[2].Caption="UTComp Version"$class'Gameinfo'.static.MakeColorCode(GoldColor)$" CTF 0.1 alpha";
 
 
   /*  for ( mut=PlayerOwner().Level.Game.BaseMutator; mut!=None; mut=mut.NextMutator )
 	if ( mut.IsA('Forward_Mutator') )
 	{
-         i_UTCompLogo.Image = texture'UTCompv17asrc.ForwardLogo';
+         i_UTCompLogo.Image = texture'UTCompCTF.ForwardLogo';
          return;
 	}
   */
@@ -187,7 +187,7 @@ DefaultProperties
 		WinHeight=0.125000
 		WinLeft=0.312500
 		WinTop=0.307113
-        Image=Texture'UTCompv17asrc.UTCompLogo'
+        Image=Texture'UTCompCTF.UTCompLogo'
      End Object
      i_UTCompLogo=GUIImage'UTCompLogo'
 

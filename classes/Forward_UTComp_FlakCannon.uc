@@ -7,6 +7,6 @@ CacheExempt;
 
 DefaultProperties
 {
-    FireModeClass[0] = Class'utcompv17asrc.Forward_UTComp_FlakFire'
-    FireModeClass[1] = Class'utcompv17asrc.Forward_UTComp_FlakAltFire'
+    FireModeClass[0] = Class'UTCompCTF.Forward_UTComp_FlakFire'
+    FireModeClass[1] = Class'UTCompCTF.Forward_UTComp_FlakAltFire'
 }

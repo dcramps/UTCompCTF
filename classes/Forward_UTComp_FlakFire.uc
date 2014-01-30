@@ -5,5 +5,5 @@ class Forward_UTComp_FlakFire extends UTComp_FlakFire;
 
 DefaultProperties
 {
-    ProjectileClass=Class'utcompv17asrc.Forward_FlakChunk'
+    ProjectileClass=Class'UTCompCTF.Forward_FlakChunk'
 }
