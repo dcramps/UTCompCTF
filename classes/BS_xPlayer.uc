@@ -2732,3 +2732,15 @@ defaultproperties
      CustomWepTypes(11)=(WepName="SPMA",damtype[0]="OnslaughtBP.DamTypeArtilleryShell")
      CustomWepTypes(12)=(WepName="XxxX ESR",damtype[0]="XxxXESRInstaGib",damtype[1]="XxxXESRHeadshot")
 }
+
+//--------------------------
+//Additions for UTCompCTF
+//--------------------------
+
+//Override to remove suicide timer.
+exec function Suicide()
+{
+  if (Pawn != None) {
+    Pawn.Suicide();
+  }
+}
