@@ -15,14 +15,6 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 
     l_Mode[2].Caption="UTComp Version"$class'Gameinfo'.static.MakeColorCode(GoldColor)$" CTF 0.1 alpha";
 
-
-  /*  for ( mut=PlayerOwner().Level.Game.BaseMutator; mut!=None; mut=mut.NextMutator )
-	if ( mut.IsA('Forward_Mutator') )
-	{
-         i_UTCompLogo.Image = texture'UTCompCTF.ForwardLogo';
-         return;
-	}
-  */
 	Super.InitComponent(myController,MyOwner);
 }
 

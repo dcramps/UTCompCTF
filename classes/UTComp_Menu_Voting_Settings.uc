@@ -3,13 +3,13 @@
 class UTComp_Menu_Voting_Settings extends UTComp_Menu_MainMenu;
 
 var automated GUIComboBox co_Skins, co_Hitsounds, co_TeamOverlay;
-var automated GUIComboBox co_Warmup,  co_NewNet, co_forward;
+var automated GUIComboBox co_Warmup,  co_NewNet;
 
 var automated GUIButton bu_Skins, bu_Hitsounds, bu_TeamOverlay;
-var automated GUIButton bu_Warmup,  bu_newNet, bu_forward;
+var automated GUIButton bu_Warmup,  bu_newNet;
 
 var automated GUILabel l_Skins, l_HitSounds, l_TeamOverlay, l_Warmup;
-var automated GUILabel l_Restart, l_NoRestart, l_NewNet, l_forward;
+var automated GUILabel l_Restart, l_NoRestart, l_NewNet;
 
 function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
@@ -33,15 +33,11 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
     co_newnet.AddItem("Disabled");
     co_newnet.AddItem("Enabled");
 
-    co_forward.additem("Disabled");
-    co_forward.additem("Enabled");
-
     co_Skins.REadOnly(True);
     co_HitSounds.ReadOnly(True);
     co_TeamOverlay.ReadOnly(True);
     co_Warmup.ReadOnly(True);
     co_newnet.ReadOnly(True);
-    co_forward.ReadOnly(True);
     Blehz();
   //  co_Amp.bVisible=False;
 }
@@ -56,7 +52,6 @@ function bool InternalOnClick( GUIComponent Sender )
         case bu_TeamOverlay:  BS_xPlayer(PlayerOwner()).CallVote(3, co_TeamOverlay.GetIndex(), "");  PlayerOwner().ClientCloseMenu();  break;
         case bu_Warmup:  BS_xPlayer(PlayerOwner()).CallVote(4, co_Warmup.GetIndex(), ""); PlayerOwner().ClientCloseMenu(); break;
         case bu_NewNet:  BS_xPlayer(PlayerOwner()).CallVote(9, co_NewNet.GetIndex(), ""); PlayerOwner().ClientCloseMenu(); break;
-        case bu_forward:  BS_xPlayer(PlayerOwner()).CallVote(10, co_Forward.GetIndex(), ""); PlayerOwner().ClientCloseMenu(); break;
     }
     return super.InternalOnClick(Sender);
 }
@@ -90,10 +85,6 @@ function Blehz()
         co_NewNet.DisableMe();
     else
         co_NewNet.EnableMe();
-    if(RepInfo!=None && (!RepInfo.bEnableVoting) || !RepInfo.bEnableForwardVoting)
-        co_Forward.DisableMe();
-    else
-        co_Forward.EnableMe();
 
     if(RepInfo!=None)
     {
@@ -105,8 +96,6 @@ function Blehz()
             co_Warmup.SetIndex(1);
         if(RepInfo.bEnableEnhancedNetCode)
             co_NewNet.SetIndex(1);
-        if(RepInfo.bForward)
-            co_Forward.SetIndex(1);
     }
 }
 
@@ -163,15 +152,6 @@ defaultproperties
      End Object
      co_NewNet=GUIComboBox'UTCompCTF.UTComp_Menu_Voting_Settings.NewNetComboBox'
 
-     Begin Object Class=GUIComboBox Name=ForwardComboBox
-		WinWidth=0.250000
-		WinHeight=0.035000
-		WinLeft=0.382187
-		WinTop=0.722918
-         OnKeyEvent=NewNetComboBox.InternalOnKeyEvent
-     End Object
-     co_Forward=GUIComboBox'UTCompCTF.UTComp_Menu_Voting_Settings.ForwardComboBox'
-
      Begin Object Class=GUIButton Name=SkinsButton
          Caption="Call Vote"
          WinTop=0.395000
@@ -227,17 +207,6 @@ defaultproperties
      End Object
      bu_NewNet=GUIButton'UTCompCTF.UTComp_Menu_Voting_Settings.NewNetButton'
 
-     Begin Object Class=GUIButton Name=ForwardButton
-         Caption="Call Vote"
-		WinWidth=0.117500
-		WinHeight=0.047500
-		WinLeft=0.665625
-		WinTop=0.715834
-         OnClick=UTComp_Menu_Voting_Settings.InternalOnClick
-         OnKeyEvent=NewNetButton.InternalOnKeyEvent
-     End Object
-     bu_Forward=GUIButton'UTCompCTF.UTComp_Menu_Voting_Settings.ForwardButton'
-
      Begin Object Class=GUILabel Name=SkinsLabel
          Caption="Skins"
          TextColor=(B=255,G=255,R=255)
@@ -284,17 +253,7 @@ defaultproperties
      End Object
      l_NewNet=GUILabel'UTCompCTF.UTComp_Menu_Voting_Settings.newNetLabel'
 
-     Begin Object Class=GUILabel Name=ForwardLabel
-         Caption="Forward Mode"
-         TextColor=(B=255,G=255,R=255)
-		WinWidth=1.000000
-		WinHeight=0.060000
-		WinLeft=0.160125
-		WinTop=0.711667
-     End Object
-     l_Forward=GUILabel'UTCompCTF.UTComp_Menu_Voting_Settings.ForwardLabel'
-
-          Begin Object class=GUILabel Name=DemnoHeadingLabel
+     Begin Object class=GUILabel Name=DemnoHeadingLabel
         Caption="--- These settings require a map reload to take effect ---"
         TextColor=(B=0,G=200,R=230)
 		WinWidth=1.000000

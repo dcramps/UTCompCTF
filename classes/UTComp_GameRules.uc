@@ -74,14 +74,14 @@ function bool OverridePickupQuery(Pawn Other, Pickup item, out byte bAllowPickup
     {
         if(Item.IsA('ShieldPack'))
         {
-            if(!Level.Game.bTeamGame || !Other.IsA('xPawn') || xPawn(Other).CanUseShield(50)!=0 || Other.IsA('Forward_Pawn'))
+            if(!Level.Game.bTeamGame || !Other.IsA('xPawn') || xPawn(Other).CanUseShield(50)!=0)
                 uPRI.PickedUpFifty++;
         }
         else if(Item.IsA('SuperShieldPack'))
             uPRI.PickedUpHundred++;
-        else if(Item.IsA('SuperHealthPack') || Item.IsA('Forward_MiniSuperHealth'))
+        else if(Item.IsA('SuperHealthPack'))
         {
-            if(Other.Health<Other.SuperHealthMax || Other.IsA('Forward_Pawn'))
+            if(Other.Health<Other.SuperHealthMax)
                 uPRI.PickedUpKeg++;
         }
         else if(Item.IsA('HealthPack'))

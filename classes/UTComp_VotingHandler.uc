@@ -339,11 +339,6 @@ function TakeActionOnVote(byte VoteType, byte VoteSwitch, string Options)
         UTCompMutator.default.bEnableEnhancedNetCode=(VoteSwitch==1);
         UTCompMutator.RepInfo.bEnableEnhancedNetCode=(VoteSwitch==1);
     }
-    else if(VoteType==10 && UTCompMutator.bEnableForwardVoting)
-    {
-        UTCompMutator.bForward=(VoteSwitch==1);
-        UTCompMutator.default.bForward=(VoteSwitch==1);
-    }
     UTCompMutator.static.StaticSaveConfig();
 }
 

@@ -43,8 +43,6 @@ var config int TimedOverTimeLength;
 var config int NumGrenadesOnSpawn;
 
 var bool bDemoStarted;
-var config bool bForward;
-var config bool bEnableForwardVoting;
 
 var config bool bShieldFix;
 var config bool  bAllowRestartVoteEvenIfMapVotingIsTurnedOff;
@@ -476,8 +474,6 @@ function SpawnReplicationClass()
     RepInfo.bEnableTimedOvertime=bEnableTimedOvertime;
     RepInfo.bEnableEnhancedNetcode=bEnableEnhancedNetcode;
     RepInfo.bEnableEnhancedNetcodeVoting=bEnableEnhancedNetcodeVoting;
-    RepInfo.bForward = bForward;
-    RepInfo.bEnableForwardVoting= bEnableForwardVoting;
     RepInfo.bShieldFix=bShieldFix;
     repinfo.bAllowRestartVoteEvenIfMapVotingIsTurnedOff = bAllowRestartVoteEvenIfMapVotingIsTurnedOff;
     for(i=0; i<VotingGametype.Length && i<ArrayCount(RepInfo.VotingNames); i++)
@@ -504,8 +500,6 @@ function PostBeginPlay()
 	ParseURL(URl);
     SetupTeamOverlay();
     SetupWarmup();
-    if(bForward)
-        Level.Game.AddMutator("UTCompCTF.Forward_Mutator", true);
     SpawnReplicationClass();
 
     G = spawn(class'UTComp_GameRules');
@@ -550,7 +544,7 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     bSuperRelevant = 0;
     if(Other.IsA('pickup') && Level.Game!=None && Level.Game.IsA('utcomp_clanarena'))
         return false;
-    if(bEnhancedNetCodeEnabledAtStartOfMap && !GetForward())
+    if(bEnhancedNetCodeEnabledAtStartOfMap)
     {
         if (xWeaponBase(Other) != None)
     	{
@@ -611,22 +605,11 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
         }
     }
 
-    if (Other.IsA('UDamagePack') && !GetDoubleDamage() && !GetForward())
+    if (Other.IsA('UDamagePack') && !GetDoubleDamage())
     {
        return false;
     }
     return true;
-}
-
-function bool GetForward()
-{
-   local mutator mut;
-   for ( mut=Level.Game.BaseMutator; mut!=None; mut=mut.NextMutator )
-	if ( mut.IsA('Forward_Mutator') )
-	{
-            return true;
-	}
-  return false;
 }
 
 function bool SniperCheckReplacement( Actor Other, out byte bSuperRelevant )
@@ -817,7 +800,7 @@ function ServerTraveling(string URL, bool bItems)
 function ParseURL(string Url)
 {
    local string Skinz0r, Sounds, overlay, warmup, dd, TimedOver
-   , TimedOverLength, grenadesonspawn, enableenhancednetcode, forward;
+   , TimedOverLength, grenadesonspawn, enableenhancednetcode;
    local array<string> Parts;
    local int i;
 
@@ -846,8 +829,6 @@ function ParseURL(string Url)
                GrenadesOnSpawn=Right(Parts[i], Len(Parts[i])-Len("GrenadesOnSpawn")-1);
            if(Left(Parts[i],Len("EnableEnhancedNetcode"))~= "EnableEnhancedNetcode")
                EnableEnhancedNetcode=Right(Parts[i], Len(Parts[i])-Len("EnableEnhancedNetcode")-1);
-           if(Left(Parts[i],Len("Forward"))~= "Forward")
-               Forward=Right(Parts[i], Len(Parts[i])-Len("Forward")-1);
        }
    }
  //  Log("DD Value"$DD);
@@ -875,11 +856,6 @@ function ParseURL(string Url)
    {
        default.bEnableDoubleDamage=(DD~="True");
        bEnableDoubleDamage = default.bEnableDoubleDamage;
-   }
-   if(Forward!="" && (DD~="False" || DD~="True"))
-   {
-       default.bForward = (Forward~="True");
-       bForward = default.bForward;
    }
    if(TimedOverLength !="" && int(TimedOverLength)>=0)
    {
@@ -1034,7 +1010,6 @@ static function FillPlayInfo (PlayInfo PlayInfo)
     PlayInfo.AddSetting("UTComp Settings", "bEnableAutoDemoRec", "Enable Serverside Demo-Recording", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlay", "Enable Team Overlay", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableEnhancedNetcode", "Enable Enhanced Netcode", 1, 1, "Check");
-    PlayInfo.AddSetting("UTComp Settings", "bForward", "Enable the Forward gameplay modification.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "ServerMaxPlayers", "Voting Max Players",255, 1, "Text","2;0:32",,True,True);
     PlayInfo.AddSetting("UTComp Settings", "NumGrenadesOnSpawn", "Number of grenades on spawn.",255, 1, "Text","2;0:32",,True,True);
 
@@ -1073,7 +1048,6 @@ static event string GetDescriptionText(string PropName)
         case "bEnableWarmupVoting": return "Check this to enable voting for Warmup.";
         case "bEnableMapVoting": return "Check this to enable voting for Maps.";
         case "WarmupTime": return "Time for warmup. Set this to 0 for unlimited, otherwise it is the time in seconds.";
-        case "bForward": return "Check this to enable the Forward gameplay modification.";
     }
 	return Super.GetDescriptionText(PropName);
 }
@@ -1121,7 +1095,7 @@ function string GetInventoryClassOverride(string InventoryClassName)
 	//		InventoryClassName = "ModWeapons.SuperDisintegrator"
 
     local int x;
-    if(bEnhancedNetCodeEnabledAtStartOfMap && !GetForward())
+    if(bEnhancedNetCodeEnabledAtStartOfMap)
     {
         for(x=0; x<ArrayCount(WeaponClassNames); x++)
         {
@@ -1278,8 +1252,6 @@ defaultproperties
      WeaponPickupClassNames(10)="UTCompCTF.NewNet_ONSMineLayerPickup"
      WeaponPickupClassNames(11)="UTCompCTF.NewNet_ONSGrenadePickup"
 
-     bForward=False
-     bEnableForwardVoting = true
      bShieldFix=true
 
      bAllowRestartVoteEvenIfMapVotingIsTurnedOff=false
