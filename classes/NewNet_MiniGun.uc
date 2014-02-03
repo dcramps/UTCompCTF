@@ -72,7 +72,7 @@ function NewNet_ServerStartFire(byte Mode, byte ClientTimeStamp, float dt)
 
 DefaultProperties
 {
-    FireModeClass(0)=class'UTCompCTF.NewNet_MiniGunFire'
-    FireModeClass(1)=class'UTCompCTF.NewNet_MiniGunAltFire'
-    PickupClass=Class'UTCompCTF.NewNet_MiniGunPickup'
+    FireModeClass(0)=class'UTCompCTFv01.NewNet_MiniGunFire'
+    FireModeClass(1)=class'UTCompCTFv01.NewNet_MiniGunAltFire'
+    PickupClass=Class'UTCompCTFv01.NewNet_MiniGunPickup'
 }

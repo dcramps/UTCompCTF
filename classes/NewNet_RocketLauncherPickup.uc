@@ -3,5 +3,5 @@ class NewNet_RocketLauncherPickup extends RocketLauncherPickup;
 
 defaultproperties
 {
-     InventoryType=Class'UTCompCTF.NewNet_RocketLauncher'
+     InventoryType=Class'UTCompCTFv01.NewNet_RocketLauncher'
 }

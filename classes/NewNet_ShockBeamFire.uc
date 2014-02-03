@@ -419,5 +419,5 @@ function SpawnBeamEffect(Vector Start, Rotator Dir, Vector HitLocation, Vector H
 
 DefaultProperties
 {
-    BeamEffectClass=Class'UTCompCTF.NewNet_ShockBeamEffect'
+    BeamEffectClass=Class'UTCompCTFv01.NewNet_ShockBeamEffect'
 }

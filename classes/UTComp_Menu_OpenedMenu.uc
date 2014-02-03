@@ -179,7 +179,7 @@ DefaultProperties
 		WinHeight=0.125000
 		WinLeft=0.312500
 		WinTop=0.307113
-        Image=Texture'UTCompCTF.UTCompLogo'
+        Image=Texture'UTCompCTFv01.UTCompLogo'
      End Object
      i_UTCompLogo=GUIImage'UTCompLogo'
 

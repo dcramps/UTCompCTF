@@ -324,14 +324,14 @@ simulated function InitializeScoreboard()
        if(class'UTComp_Settings'.default.bUseDefaultScoreboard)
        {
            if(gamereplicationinfo.bTeamGame)
-               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTF.UTComp_ScoreBoardTDM", class'Class'));
+               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardTDM", class'Class'));
            else
-               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTF.UTComp_ScoreBoardDM", class'Class'));
+               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardDM", class'Class'));
            ClientChangedScoreboard=True;
         }
    }
    else if(ClientChangedScoreBoard && !class'UTComp_Settings'.default.bUseDefaultScoreboard)
-       NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTF.UTComp_ScoreBoard", class'Class'));
+       NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoard", class'Class'));
    if(myHUD!=None && NewScoreBoardClass!=None)
         myHUD.SetScoreBoardClass( NewScoreboardClass);
 }
@@ -2674,8 +2674,8 @@ function bool ComboDisabled(class<Combo> ComboClass)
 defaultproperties
 {
 
-     UTCompMenuClass="UTCompCTF.UTComp_Menu_OpenedMenu"
-     UTCompVotingMenuClass="UTCompCTF.UTComp_Menu_VoteInProgress"
+     UTCompMenuClass="UTCompCTFv01.UTComp_Menu_OpenedMenu"
+     UTCompVotingMenuClass="UTCompCTFv01.UTComp_Menu_VoteInProgress"
      redmessagecolor=(B=64,G=64,R=255,A=255)
      greenmessagecolor=(B=128,G=255,R=128,A=255)
      bluemessagecolor=(B=255,G=192,R=64,A=255)

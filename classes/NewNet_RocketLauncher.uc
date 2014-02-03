@@ -471,7 +471,7 @@ function UnTimeTravel()
 
 DefaultProperties
 {
-    PickupClass=Class'UTCompCTF.NewNet_RocketLauncherPickup'
-    FireModeClass(0)=class'UTCompCTF.NewNet_RocketFire'
-    FireModeClass(1)=class'UTCompCTF.NewNet_RocketMultiFire'
+    PickupClass=Class'UTCompCTFv01.NewNet_RocketLauncherPickup'
+    FireModeClass(0)=class'UTCompCTFv01.NewNet_RocketFire'
+    FireModeClass(1)=class'UTCompCTFv01.NewNet_RocketMultiFire'
 }
