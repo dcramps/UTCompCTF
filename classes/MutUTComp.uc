@@ -692,7 +692,12 @@ function ModifyLogin(out string Portal, out string Options)
 		Level.Game.PlayerControllerClass = none;
 	}
 
-    if(Level.Game.ScoreBoardType~="xInterface.ScoreBoardDeathMatch")
+
+    if (Level.Game.IsA('xCTFGame'))
+    {
+        Level.Game.ScoreBoardType = "UTCompCTF.UTComp_ScoreBoardCTF";
+    }
+    else if(Level.Game.ScoreBoardType~="xInterface.ScoreBoardDeathMatch")
     {
         if(bEnableScoreBoard)
             Level.Game.ScoreBoardType="UTCompCTF.UTComp_ScoreBoard";
