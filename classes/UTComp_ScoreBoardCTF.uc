@@ -18,20 +18,21 @@ var Font FontArrayFonts[9];
 var localized string FontArrayNames[9];
 
 //Font indices
-var FONT_PLAYER_PING      = 1;
-var FONT_PLAYER_PL        = 1;
-var FONT_PLAYER_LOCATION  = 4;
-var FONT_PLAYER_STAT_NUM  = 4;
-var FONT_PLAYER_STAT      = 3;
-var FONT_PLAYER_SCORE     = 7;
-var FONT_PLAYER_NAME      = 6;
-var FONT_TEAM_PING_NUM    = 2;
-var FONT_TEAM_PL_NUM      = 2;
-var FONT_TEAM_POWERUP_NUM = 2;
-var FONT_TEAM_PING        = 3;
-var FONT_TEAM_PL          = 3;
-var FONT_TEAM_POWERUP_PER = 5;
-var FONT_TEAM_SCORE       = 7;
+var int FONT_PLAYER_PING;//      = 1;
+var int FONT_PLAYER_PL;//        = 1;
+var int FONT_PLAYER_LOCATION;// = 4;
+var int FONT_PLAYER_STAT_NUM;// = 4;
+var int FONT_PLAYER_STAT;// = 3;
+var int FONT_PLAYER_SCORE;// = 7;
+var int FONT_PLAYER_NAME;// = 6;
+var int FONT_TEAM_PING_NUM;// = 2;
+var int FONT_TEAM_PL_NUM;// = 2;
+var int FONT_TEAM_POWERUP_NUM;// = 2;
+var int FONT_TEAM_PING;// = 3;
+var int FONT_TEAM_PL;// = 3;
+var int FONT_TEAM_POWERUP_PER;// = 5;
+var int FONT_TEAM_SCORE;// = 7;
+
 /*
  * Draw the map title, ie "Capture the Flag on Grendelkeep"
  */ 
@@ -106,6 +107,24 @@ simulated event UpdateScoreBoard(Canvas C)
   soTiny           = GetSmallerFontFor(C,5);
   maxTiles=8; //max players per team?
     
+
+  FONT_PLAYER_PING      = 1;
+  FONT_PLAYER_PL        = 1;
+  FONT_PLAYER_LOCATION  = 4;
+  FONT_PLAYER_STAT_NUM  = 4;
+  FONT_PLAYER_STAT      = 3;
+  FONT_PLAYER_SCORE     = 7;
+  FONT_PLAYER_NAME      = 6;
+  FONT_TEAM_PING_NUM    = 2;
+  FONT_TEAM_PL_NUM      = 2;
+  FONT_TEAM_POWERUP_NUM = 2;
+  FONT_TEAM_PING        = 3;
+  FONT_TEAM_PL          = 3;
+  FONT_TEAM_POWERUP_PER = 5;
+  FONT_TEAM_SCORE       = 7;
+
+
+
   if(Owner!=None) 
   {
     OwnerPRI = PlayerController(Owner).PlayerReplicationInfo;
@@ -165,8 +184,8 @@ simulated event UpdateScoreBoard(Canvas C)
   //DrawLogo(C, screenScale);
   //DrawMapTitle(C);
 
-  DrawTeamInfoBox(C,        0.02,         0.12,         1,           screenScale,     Min(RedPlayerCount,  maxTiles)); // RedTeam
-  //DrawTeamInfoBox(C,        0.514,        0.12,         0,           screenScale,     Min(BluePlayerCount, maxTiles)); // BlueTeam
+  DrawTeamHeader(C, 0); //Red
+  //DrawTeamHeader(C, 1); //Blue
 
   C.SetDrawColor(255,255,255,255);
 
@@ -179,14 +198,6 @@ simulated event UpdateScoreBoard(Canvas C)
   // //Draw blue score
   // C.SetPos(1000, 35);// Blue
   // C.DrawText(int(GRI.Teams[1].Score));
-
-  //Draw average ping
-  C.Font = SmallerFont;
-  C.SetPos( ScaleX(C,0.35)/*(C.ClipX/2)/2 + C.ClipX*0.1150*/ , ScaleY(C,0.13));// Red
-  C.DrawText("Avg ping:"@GetAverageTeamPing(0));
-  C.SetPos( ((C.ClipX/2)+(C.ClipX/2)/2+C.ClipX*0.1150) , C.ClipY*0.130);// Blue
-  C.DrawText("Avg ping:"@GetAverageTeamPing(1));
-  C.Font=MainFont;
 
   if (((FPHTime == 0) || (!UnrealPlayer(Owner).bDisplayLoser && !UnrealPlayer(Owner).bDisplayWinner)) && (GRI.ElapsedTime > 0))
   {
@@ -272,7 +283,32 @@ simulated function DrawLogo(Canvas C , float scale)
 
 simulated function DrawTeamHeader(Canvas C, int teamNum)
 {
+  local float scoreWidth;
+  local float scoreHeight;
 
+  //Turn on alpha for transparent fuckery
+  C.Style = ERenderStyle.STY_Alpha;
+
+  //Middle screen divider (debug)
+  SetPosScaled(C, 959, 0);
+  C.SetDrawColor(255,0,0,255);
+  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 3, 1080);
+
+
+  //Main header
+  C.SetDrawColor(0,0,0,90);
+  SetPosScaled(C, 95, 110);
+  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 840, 75);
+
+  //Score
+  C.SetDrawColor(255, 255, 255, 255);
+  C.Style = ERenderStyle.STY_Normal;
+  C.Font = GetFontWithSize(FONT_TEAM_SCORE); 
+  C.StrLen(int(GRI.Teams[teamNum].Score), scoreWidth, scoreHeight); //Get the width/height of the score. Height isn't used, but whatever.
+  C.DrawTextJustified(int(GRI.Teams[teamNum].Score), 2, 875, 110, 875 + scoreWidth, 185);
+
+  //Draw average ping
+  //C.DrawText(@GetAverageTeamPing(teamNum));
 }
 
 /*
@@ -280,23 +316,7 @@ simulated function DrawTeamHeader(Canvas C, int teamNum)
  */
 simulated function DrawTeamInfoBox(Canvas C, float startX, float startY, int teamNum, float scale, int playerCount)
 {
-  C.Style = ERenderStyle.STY_Alpha;
-  C.SetDrawColor(0,0,0,90);
 
-  //Main header
-  SetPosScaled(C, 25, 90);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 790, 75);
-
-  //Score box
-  SetPosScaled(C, 815, 33);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 135, 132);
-
-  //Score
-  C.SetDrawColor(255, 255, 255, 255);
-  C.Style = ERenderStyle.STY_Normal;
-  C.Font = GetFontWithSize(9);
-  SetPosScaled(C, 845, 65);
-  C.DrawText(int(GRI.Teams[teamNum].Score));
 }
 
 
@@ -498,5 +518,5 @@ defaultproperties
   FontArrayNames(5)  = "UT2003Fonts.FontEurostile17"
   FontArrayNames(6)  = "UT2003Fonts.FontEurostile29"
   FontArrayNames(7)  = "UT2003Fonts.FontEurostile37"
-  FontArrayNames(8) = "Engine.DefaultFont"
+  FontArrayNames(8)  = "Engine.DefaultFont"
 }
