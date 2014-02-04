@@ -45,6 +45,10 @@ var bool bDemoStarted;
 var config bool bShieldFix;
 var config bool  bAllowRestartVoteEvenIfMapVotingIsTurnedOff;
 
+// CTF-related
+var config int CapBonus, FlagKillBonus, CoverBonus, SealBonus, GrabBonus, MinimalCapBonus;
+var config float BaseReturnBonus, MidReturnBonus, EnemyBaseReturnBonus, CloseSaveReturnBonus;
+
 /* ----Known issues ----
    Mutant:  No Bskins/Forcemodel
    Invasion:  No Bskins/forcemodel on bots (but will on players), no warmup, no custom scoreboard
@@ -1258,4 +1262,15 @@ defaultproperties
      bShieldFix=true
 
      bAllowRestartVoteEvenIfMapVotingIsTurnedOff=false
+
+    CapBonus = 5
+    FlagKillBonus = 3
+    CoverBonus = 4
+    SealBonus = 4
+    GrabBonus = 0
+    MinimalCapBonus = 5
+    BaseReturnBonus = 0.500000
+    MidReturnBonus = 2.000000
+    EnemyBaseReturnBonus = 5.000000
+    CloseSaveReturnBonus = 10.000000
 }

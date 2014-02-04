@@ -1721,7 +1721,10 @@ simulated function ResetUTCompStats()
         uPRI.FlagCaps = 0;
         uPRI.FlagPickups = 0;
         uPRI.FlagReturns = 0;
-
+        uPRI.FlagKills = 0;
+        uPRI.Assists = 0;
+        uPRI.Covers = 0;
+        uPRI.Seals = 0;
     }
 }
 
