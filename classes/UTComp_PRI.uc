@@ -50,6 +50,11 @@ var int TotalMapsToBeReceived;
 var bool bIsLegitPlayer;
 var int totaldamageg;
 
+// CTF stats
+var int FlagGrabs;
+var int FlagCaps;
+var int FlagPickups;
+var int FlagReturns;
 
 
 
@@ -78,7 +83,8 @@ replication
 {
     reliable if(Role==Role_Authority)
          bIsReady, CoachTeam, CurrentVoteID,
-         ColoredName, RealKills;
+         ColoredName, RealKills,
+         FlagGrabs, FlagCaps, FlagPickups, FlagReturns;
     unreliable if(Role==Role_Authority && bNetOwner)
         PickedUpFifty, PickedUpHundred, PickedUpAmp,
         PickedUpVial, PickedUpHealth, PickedUpKeg,

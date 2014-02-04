@@ -1,7 +1,5 @@
 class MutUTComp extends Mutator;
 
-#exec OBJ LOAD FILE=minimegatex.utx PACKAGE=UTCompCTFv01
-
 var config bool bEnableVoting;
 var config bool bEnableBrightskinsVoting;
 var config bool bEnableHitsoundsVoting;
@@ -685,7 +683,12 @@ function ModifyLogin(out string Portal, out string Options)
     else if(Level.Game.ScoreBoardType~="xInterface.ScoreBoardTeamDeathMatch")
     {
         if(bEnableScoreBoard)
-            Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoard";
+        {
+            if (Level.Game.IsA('UTComp_xCTFGame'))
+                Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoardCTF";
+            else
+                Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoard";
+        }
         else
             Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoardTDM";
     }

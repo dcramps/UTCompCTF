@@ -319,11 +319,11 @@ simulated function InitializeScoreboard()
 {
    local class<scoreboard> NewScoreboardclass;
 
-   if(myHud!=None && myHUD.ScoreBoard.IsA('UTComp_ScoreBoard') && gamereplicationinfo!=None)
+   if(myHud!=None && myHUD.ScoreBoard.IsA('UTComp_ScoreBoard') && GameReplicationInfo!=None)
    {
        if(class'UTComp_Settings'.default.bUseDefaultScoreboard)
        {
-           if(gamereplicationinfo.bTeamGame)
+           if(GameReplicationInfo.bTeamGame)
                NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardTDM", class'Class'));
            else
                NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardDM", class'Class'));
@@ -331,7 +331,12 @@ simulated function InitializeScoreboard()
         }
    }
    else if(ClientChangedScoreBoard && !class'UTComp_Settings'.default.bUseDefaultScoreboard)
-       NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoard", class'Class'));
+   {
+       if (Level.Game.IsA('UTComp_xCTFGame'))
+           NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardCTF", class'Class'));
+       else
+           NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoard", class'Class'));
+   }
    if(myHUD!=None && NewScoreBoardClass!=None)
         myHUD.SetScoreBoardClass( NewScoreboardClass);
 }
@@ -1692,13 +1697,15 @@ simulated function NotifyRestartMap()
 simulated function ResetUTCompStats()
 {
     local int i;
-    for(i=0; i<NormalWepStatsPrim.Length; i++)
+    local UTComp_PRI uPRI;
+
+    for(i = 0; i < NormalWepStatsPrim.Length; i++)
     {
         NormalWepStatsPrim[i].Damage=0;
         NormalWepStatsPrim[i].Hits=0;
         NormalWepStatsPrim[i].Percent=0;
     }
-    for(i=0; i<NormalWepStatsalt.Length; i++)
+    for (i= 0; i < NormalWepStatsalt.Length; i++)
     {
         NormalWepStatsalt[i].Damage=0;
         NormalWepStatsalt[i].Hits=0;
@@ -1706,16 +1713,25 @@ simulated function ResetUTCompStats()
     }
     CustomWepStats.Length=0;
     DamG=0;
- //   ServerResetUTCompStats();
+
+    if (PlayerReplicationInfo != None)
+    {
+        uPRI = class'UTComp_Util'.static.GetUTCompPRI(PlayerReplicationInfo);
+        uPRI.FlagGrabs = 0;
+        uPRI.FlagCaps = 0;
+        uPRI.FlagPickups = 0;
+        uPRI.FlagReturns = 0;
+
+    }
 }
 
 simulated function ResetEpicStats()
 {
     local TeamPlayerReplicationInfo tPRI;
     local int i;
-    if(playerReplicationInfo !=None && Teamplayerreplicationinfo(playerreplicationinfo)!=None)
+    if (PlayerReplicationInfo != None && TeamPlayerReplicationInfo(PlayerReplicationInfo)!= None)
     {
-        tPRI=Teamplayerreplicationinfo(playerreplicationinfo);
+        tPRI=Teamplayerreplicationinfo(PlayerReplicationInfo);
         tPRI.bFirstBlood=False;
         tPRI.FlagTouches=0;
         tPRI.FlagReturns=0;
