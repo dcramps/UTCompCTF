@@ -126,7 +126,6 @@ simulated event UpdateScoreBoard(Canvas C)
     OwnerPRI = PlayerController(Owner).PlayerReplicationInfo;
   }
 
-
   //Fill team PRI arrays
 
   //Red/Blue offsets are useless?
@@ -180,20 +179,9 @@ simulated event UpdateScoreBoard(Canvas C)
   //DrawLogo(C, screenScale);
   //DrawMapTitle(C);
 
-  DrawTeamHeader(C, 0); //Red
-  //DrawTeamHeader(C, 1); //Blue
+  DrawTeamHeaders(C);
 
   C.SetDrawColor(255,255,255,255);
-
-  // C.Font = mainFont;
-
-  // //Draw red score
-  // C.SetPos(0, 35);
-  // C.DrawText(int(GRI.Teams[0].Score));
-
-  // //Draw blue score
-  // C.SetPos(1000, 35);// Blue
-  // C.DrawText(int(GRI.Teams[1].Score));
 
   if (((FPHTime == 0) || (!UnrealPlayer(Owner).bDisplayLoser && !UnrealPlayer(Owner).bDisplayWinner)) && (GRI.ElapsedTime > 0))
   {
@@ -277,31 +265,45 @@ simulated function DrawLogo(Canvas C , float scale)
  * Draw team header
  */
 
-simulated function DrawTeamHeader(Canvas C, int teamNum)
+simulated function DrawTeamHeaders(Canvas C)
 {
-  local float scoreWidth;
-  local float scoreHeight;
+  local float redScoreWidth, redScoreHeight;
+  local float blueScoreWidth, blueScoreHeight;
+  local int baseHeight, baseWidth, baseY, redBaseX, blueBaseX;
+
+  baseHeight = 75;
+  baseWidth  = 840;
+  baseY      = 110;
+  redBaseX   = 95;  //95+840 width = 935, 960-935 = 25 (Gap to mid)
+  blueBaseX  = 985; //960 + 25 gap from mid
 
   //Turn on alpha for transparent fuckery
   C.Style = ERenderStyle.STY_Alpha;
 
-  //Middle screen divider (debug)
+  //Middle screen divider (debug...where is my #ifdef DEBUG?)
   SetPosScaled(C, 959, 0);
   C.SetDrawColor(255,0,0,255);
   DrawTileStretchedScaled(C, material'Engine.BlackTexture', 3, 1080);
 
-
-  //Main header
+  //Main header Red
   C.SetDrawColor(0,0,0,90);
-  SetPosScaled(C, 95, 110);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 840, 75);
+  SetPosScaled(C, redBaseX, baseY);
+  DrawTileStretchedScaled(C, material'Engine.BlackTexture', baseWidth, baseHeight);
+
+  //Main header blue
+  SetPosScaled(C, blueBaseX, baseY);
+  DrawTileStretchedScaled(C, material'Engine.BlackTexture', baseWidth, baseHeight);
 
   //Score
   C.SetDrawColor(255, 255, 255, 255);
   C.Style = ERenderStyle.STY_Normal;
   C.Font = GetFontWithSize(FONT_TEAM_SCORE); 
-  C.StrLen(int(GRI.Teams[teamNum].Score), scoreWidth, scoreHeight); //Get the width/height of the score. Height isn't used, but whatever.
-  C.DrawTextJustified(int(GRI.Teams[teamNum].Score), 2, 875, 110, 875 + scoreWidth, 185);
+  C.StrLen(int(GRI.Teams[0].Score), redScoreWidth, redScoreHeight);
+  C.StrLen(int(GRI.Teams[1].Score), blueScoreWidth, blueScoreHeight);
+
+  DrawTextJustifiedScaled(C, int(GRI.Teams[0].Score), 2, 960-35-redScoreWidth - 10, baseY, 885  + redScoreWidth,  baseY + 75);
+  DrawTextJustifiedScaled(C, int(GRI.Teams[1].Score), 0, blueBaseX + 10,            baseY, 1075 + blueScoreWidth, baseY + 75);
+
 
   //Draw average ping
   //C.DrawText(@GetAverageTeamPing(teamNum));
@@ -321,7 +323,7 @@ simulated function DrawTeamInfoBox(Canvas C, float startX, float startY, int tea
  */
 simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, float x, float y, float scale)
 {
-  Super.DrawPlayerInformation(C, PRI, x, y, scale);
+  //Super.DrawPlayerInformation(C, PRI, x, y, scale);
 }
 
 /*
@@ -332,56 +334,43 @@ simulated function ArrangeSpecs(out PlayerReplicationInfo PRI[MAXPLAYERS])
   
 }
 
-/*------
- * Util
- *------
+/*
+ *-----------------
+ * Scaling functions
+ * Regular Canvas functions but scaled versions to reduce stuff like ClipX*0.01248 existing in all the draw functions
+ * These are here because I am too lazy to subclass Canvas (lol)
+ *-----------------
  */
 
-/*
- * SetPos w/ awareness of screen size.
- * All values are based on 1920x1080, so this fixes them to scale to smaller resolution.
- */
+//ScaleX and ScaleY take a percentage value and convert to pixels
+function float ScaleX(Canvas C, float value)
+{
+  return C.ClipX * (value/1920);
+}
+
+function float ScaleY(Canvas C, float value)
+{
+  return C.ClipY * (value/1080);
+}
 
 function SetPosScaled(Canvas C, float x, float y)
 {
-  C.SetPos(ScaleX(C, x/1920), ScaleY(C, y/1080));
+  C.SetPos(ScaleX(C, x), ScaleY(C, y));
 }
-
-/*
- * DrawTileStretched w/ awareness of screen size.
- * All values are based on 1920x1080, so this fixes them to scale to smaller resolution.
- */
 
 function DrawTileStretchedScaled(Canvas C, material mat, float XL, float YL)
 {
-  C.DrawTileStretched(mat, ScaleX(C, XL/1920), ScaleY(C, YL/1080));
+  C.DrawTileStretched(mat, ScaleX(C, XL), ScaleY(C, YL));
 }
-
 
 function DrawBoxScaled(Canvas C, float w, float h)
 {
 
 }
 
-/*
- * Converts percentage to pixel value on X axis
- * eg: PercentX(C, 50.0) on a 1920x1080 monitor 
- * would return 960
- */
-function float ScaleX(Canvas C, float percent)
+function DrawTextJustifiedScaled(Canvas C, coerce string text, byte justification, float x1, float y1, float x2, float y2)
 {
-  return C.ClipX * (percent);
-}
-
-
-/*
- * Converts percentage to pixel value on Y axis
- * eg: PercentY(C, 50.0) on a 1920x1080 monitor 
- * would return 540
- */
-function float ScaleY(Canvas C, float percent)
-{
-  return C.ClipY * (percent);
+  C.DrawTextJustified(text, justification, ScaleX(C, x1), ScaleY(C, y1), ScaleX(C, x2), ScaleX(C, y2));
 }
 
 /* 
