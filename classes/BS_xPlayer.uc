@@ -93,6 +93,8 @@ var float errorsamples, totalerror;
 
 var bool bDisableSpeed, bDisableBooster, bDisableInvis, bDisableberserk;
 
+var bool bSpecingViewGoal;
+
 var UTComp_PRI currentStatDraw;
 
 replication
@@ -1055,10 +1057,13 @@ exec function SpecViewGoal()
 
 function ServerSpecViewGoal()
 {
- 	local actor NewGoal;
+  local actor NewGoal;
 
     if(!IsCoaching())
-       super.ServerSpecViewGoal();
+    {
+      bSpecingViewGoal = true;
+      super.ServerSpecViewGoal();
+    }
 
     if ( PlayerReplicationInfo.bOnlySpectator && IsInState('Spectating') )
     {
@@ -1067,12 +1072,18 @@ function ServerSpecViewGoal()
         {
             if(Pawn(NewGoal)!=None && ((Pawn(NewGoal).GetTeamNum() == 1 && IsCoachingBlue()) || (Pawn(NewGoal).GetTeamNum() == 0 && IsCoachingRed())))
             {
-                SetViewTarget(NewGoal);
+              SetViewTarget(NewGoal);
     	        ClientSetViewTarget(NewGoal);
 	            bBehindView = true; //bChaseCam;
             }
         }
     }
+}
+
+function ServerViewSelf()
+{
+  bSpecingViewGoal = false;
+  Super.ServerViewSelf();
 }
 
 exec function voteyes()
@@ -1184,6 +1195,8 @@ function bool ServerNextPlayer(int teamindex)
    local int k;
    local controller C;
    local array<Controller> RedPlayers;
+
+   bSpecingViewGoal = false;
 
    for(C=Level.ControllerList; c!=None; C=C.NextController)
    {
@@ -1548,21 +1561,24 @@ state spectating
         Super.BeginState();
         SetTimer(1.0, True);
     }
-      exec function Fire( optional float F )
+    
+    exec function Fire(optional float F)
     {
-    	if ( bFrozen )
-	{
-		if ( (TimerRate <= 0.0) || (TimerRate > 1.0) )
-			bFrozen = false;
-		return;
-	}
-        if(IsCoachingRed())
-            NextRedPlayer();
-        else if(IsCoachingBlue())
-            NextBluePlayer();
-        else
-            ServerViewNextPlayer();
+      if ( bFrozen )
+      {
+        if ((TimerRate <= 0.0) || (TimerRate > 1.0))
+          bFrozen = false;
+        return;
+      }
+
+      if(IsCoachingRed())
+        NextRedPlayer();
+      else if(IsCoachingBlue())
+        NextBluePlayer();
+      else
+        ServerViewNextPlayer();
     }
+
     function Timer()
     {
       if(!IsCoaching())
@@ -1591,7 +1607,9 @@ state spectating
         if(IsCoaching())
             return;
         else
-            Super.AltFire(F);
+        {
+          Super.AltFire(F);
+        }
     }
 }
 

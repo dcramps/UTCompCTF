@@ -113,6 +113,8 @@ function bool OverridePickupQuery(Pawn Other, Pickup item, out byte bAllowPickup
 function ScoreKill(Controller Killer, Controller Killed)
 {
 	  local UTComp_PRI uPRI;
+      local Controller C;
+      local BS_xPlayer uPC;
 
       if(Killer != none && Killed !=None)
       {
@@ -137,6 +139,28 @@ function ScoreKill(Controller Killer, Controller Killed)
                   uPRI.RealKills++;
           }
       }
+
+
+    // Next, if we are spectating a flag carrier through SpecViewGoal, we want to move to free cam at the location the FC died !
+    for (C = Level.ControllerList; C != None; C = C.NextController)
+    {
+        uPC = BS_xPlayer(C);
+        if (uPC != None && C.PlayerReplicationInfo != None && C.PlayerReplicationInfo.bOnlySpectator)
+        {
+            if (xPawn(uPC.ViewTarget) != None && uPC.bSpecingViewGoal && (xPawn(uPC.ViewTarget).Controller == Killed || xPawn(uPC.ViewTarget).OldController == Killed)) 
+            {
+                uPC.SetLocation(uPC.CalcViewLocation);
+                uPC.ClientSetLocation(uPC.CalcViewLocation, uPC.Rotation);
+
+                uPC.bBehindView = false;
+                uPC.SetViewTarget(uPC);
+                uPC.ClientSetViewTarget(uPC); 
+            }
+        }
+        
+    }
+
+
 
     if ( NextGameRules != None )
 		NextGameRules.ScoreKill(Killer,Killed);
@@ -172,10 +196,11 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
 
     local Pawn killerTeamFC, victimTeamFC;
     local vector killerTeamFCPosition;
+    local bool preventDeath;
+    preventDeath = Super.PreventDeath(Victim, Killer, damageType, HitLocation);
 
-
-    if (!Level.Game.IsA('xCTFGame'))
-        return Super.PreventDeath(Victim, Killer, damageType, HitLocation);
+    if (preventDeath || !Level.Game.IsA('xCTFGame'))
+        return preventDeath;
 
     if (Victim != None && Killer != None)
     {
