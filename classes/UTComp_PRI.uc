@@ -54,11 +54,13 @@ var int totaldamageg;
 var int FlagGrabs;
 var int FlagCaps;
 var int FlagPickups;
-var int FlagReturns;
 var int FlagKills;
 var int Assists;
 var int Covers;
+var int CoverSpree;
 var int Seals;
+var int SealSpree;
+var int DefKills;
 
 
 
@@ -88,8 +90,8 @@ replication
     reliable if(Role==Role_Authority)
          bIsReady, CoachTeam, CurrentVoteID,
          ColoredName, RealKills,
-         FlagGrabs, FlagCaps, FlagPickups, FlagReturns, FlagKills,
-         Assists, Covers, Seals;
+         FlagGrabs, FlagCaps, FlagPickups, FlagKills,
+         Assists, Covers, CoverSpree, Seals, SealSpree, DefKills;
     unreliable if(Role==Role_Authority && bNetOwner)
         PickedUpFifty, PickedUpHundred, PickedUpAmp,
         PickedUpVial, PickedUpHealth, PickedUpKeg,

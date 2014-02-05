@@ -1,17 +1,13 @@
 
 
-class UTComp_ScoreBoardCTF extends UTComp_ScoreBoardDM;
+class UTComp_ScoreBoardCTF extends UTComp_ScoreBoard;
+
 #exec texture Import File=textures\UTCompLogo.TGA Name=UTCompLogo Mips=Off Alpha=1
 #exec texture Import File=textures\forward_logo.dds name=ForwardLogo Mips=Off Alpha=1 LodSet=5
 #exec texture Import File=textures\ScoreboardText.TGA Name=ScoreboardText Mips=Off Alpha=1
 
-var font mainFont, notReducedFont, sortaReducedfont, reducedFont, soTiny, largeFont;
 var localized string fraglimitteam;
-var UTComp_Warmup uWarmup;
-var config bool bEnableColoredNamesOnScoreboard;
-var config bool bDrawStats;
-var config bool bDrawPickups;
-var config bool bOverrideDisplayStats;
+
 
 //font names and objects
 var Font FontArrayFonts[9];
@@ -316,7 +312,7 @@ simulated function DrawTeamHeader(Canvas C, int teamNum)
  */
 simulated function DrawTeamInfoBox(Canvas C, float startX, float startY, int teamNum, float scale, int playerCount)
 {
-
+  Super.DrawTeamInfoBox(C, startX, startY, teamNum, scale, playerCount);
 }
 
 
@@ -325,15 +321,15 @@ simulated function DrawTeamInfoBox(Canvas C, float startX, float startY, int tea
  */
 simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, float x, float y, float scale)
 {
-
+  Super.DrawPlayerInformation(C, PRI, x, y, scale);
 }
 
 /*
  * Arrange specs - WebAdmin, DemoRecSpectator go first.
  */
-simulated function ArrangeSpecs(PlayerReplicationInfo PRI)
+simulated function ArrangeSpecs(out PlayerReplicationInfo PRI[MAXPLAYERS])
 {
-
+  
 }
 
 /*------

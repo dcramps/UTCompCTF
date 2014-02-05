@@ -142,6 +142,161 @@ function ScoreKill(Controller Killer, Controller Killed)
 		NextGameRules.ScoreKill(Killer,Killed);
 }
 
+/*
+  Determines if the controller in the team's zone.
+*/
+function bool IsInZone(Controller c, int team)
+{
+  local string loc;
+
+  if (c.PlayerReplicationInfo != None)
+  {
+    loc = c.PlayerReplicationInfo.GetLocationName();
+
+    if (team == 0) 
+      return (Instr(Caps(loc), "RED" ) != -1);
+      else 
+        return (Instr(Caps(loc), "BLUE") != -1);
+  }
+
+  return false;
+}
+
+/*
+ * This is used for the covers, seals and flag kills.
+ */
+function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> damageType, vector HitLocation)
+{
+    local PlayerReplicationInfo victimPRI, killerPRI;
+    local UTComp_PRI victimuPRI, killeruPRI;
+
+    local Pawn killerTeamFC, victimTeamFC;
+    local vector killerTeamFCPosition;
+
+
+    if (!Level.Game.IsA('xCTFGame'))
+        return Super.PreventDeath(Victim, Killer, damageType, HitLocation);
+
+    if (Victim != None && Killer != None)
+    {
+        victimPRI = Victim.PlayerReplicationInfo;
+        killerPRI = Killer.PlayerReplicationInfo;
+
+        // Covers and seals!
+        if (victimPRI != None && killerPRI != None && killerPRI.Team != victimPRI.Team)
+        {
+            killerTeamFC = CTFBase(victimPRI.Team.HomeBase).myFlag.Holder;
+            victimTeamFC = CTFBase(killerPRI.Team.HomeBase).myFlag.Holder;
+            
+            if (killerTeamFC != None)
+            {
+                killerTeamFCPosition = killerTeamFC.Location;
+            }
+
+
+            victimuPRI = class'UTComp_Util'.static.GetUTCompPRI(victimPRI);
+            killeruPRI = class'UTComp_Util'.static.GetUTCompPRI(killerPRI);
+
+            if (victimPRI.HasFlag != None)
+            {
+                killeruPRI.FlagKills++;
+                killerPRI.Score += class'UTCompCTFv01.MutUTComp'.Default.FlagKillBonus;
+            }
+            else if (killerPRI.HasFlag == None && killerTeamFC != None)
+            {
+
+                // For a cover bonus:
+                // a) The victim is 512uu close to the FC
+                // b) The killer is 512uu close to the FC
+                // c) The victim is 1536uu close to the FC and can see him
+                // d) The victim is 1024uu close to the FC and the killer can see the FC
+                // e) The victim is 768uu close and is in line-of-sight of the FC (but not necessarely looking at him).
+                
+                Log("__Distance Victim-FC:" @ VSize(Victim.Location - killerTeamFCPosition));
+                Log("__Distance Killer-FC:" @ VSize(Killer.Location - killerTeamFCPosition));
+                Log("__VictimCanSeeFC:" @ Victim.Controller.CanSee(killerTeamFC));
+                Log("__VictimLOSFC:" @ Victim.Controller.lineOfSightTo(killerTeamFC));
+
+                // I actually increased the numbers by 20%. Those (in the comments) were the UT99 numbers
+                if ((VSize(Victim.Location - killerTeamFCPosition) < 614.4)
+                 || (VSize(Killer.Location - killerTeamFCPosition) < 614.4)
+                 || (VSize(Victim.Location - killerTeamFCPosition) < 1843.2 && Victim.Controller.CanSee(killerTeamFC))
+                 || (VSize(Victim.Location - killerTeamFCPosition) < 1228.8 && Killer.CanSee(killerTeamFC))
+                 || (VSize(Victim.Location - killerTeamFCPosition) < 921.6 && Victim.Controller.lineOfSightTo(killerTeamFC)))
+                {
+
+                    killeruPRI.Covers++;
+                    killeruPRI.CoverSpree++;
+                    killerPRI.Score += class'UTCompCTFv01.MutUTComp'.Default.CoverBonus;
+
+                    Log("Cover - "@killerPRI.PlayerName);
+
+                    // CoverSpree!
+                    if (killeruPRI.CoverSpree == 3)
+                    {
+                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(4 + 64, killerPRI, victimPRI));
+                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
+                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        else
+                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 4, killerPRI, victimPRI);
+                    }
+                    else if (killeruPRI.CoverSpree == 4 && class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType > 0)
+                    {
+                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(5 + 64, killerPRI, victimPRI));
+                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
+                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        else
+                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 5, killerPRI, victimPRI);
+                    }
+                    else if (class'UTCompCTFv01.MutUTComp'.Default.CoverMsgType > 0) // Normal Cover
+                    {
+                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(0 + 64, killerPRI, victimPRI));
+                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
+                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        else
+                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 0, killerPRI, victimPRI);
+                    }
+                }
+
+                // If the flag is still on the base, we can make seals!
+                if (victimTeamFC == None)
+                {
+                    // If both the victim and the FC are in the FC's zone, it's a seal !
+                    if (IsInZone(Victim.Controller, killerPRI.Team.TeamIndex) && IsInZone(killerTeamFC.Controller, killerPRI.Team.TeamIndex))
+                    {
+                        killeruPRI.Seals++;
+                        killeruPRI.SealSpree++;
+                        killeruPRI.DefKills++; // seal is also a defkill
+
+                        if (class'UTCompCTFv01.MutUTComp'.Default.SealMsgType > 0 && killeruPRI.SealSpree == 2) // Sealing base
+                        {
+                          if (class'UTCompCTFv01.MutUTComp'.Default.SealMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(1 + 64, killerPRI, victimPRI));
+                            //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
+                            //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        else
+                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 1, killerPRI, victimPRI);
+                        }
+                    }
+                }
+                else
+                {
+                    if (IsInZone(Victim.Controller, killerPRI.Team.TeamIndex))
+                    {
+                        killeruPRI.DefKills++;
+                    }
+                }
+            }
+        }
+    }
+
+
+    return Super.PreventDeath(Victim, Killer, damageType, HitLocation);
+}
+
 function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 {
     if(UTCompMutator.WarmupClass!=None && UTCompMutator.WarmupClass.bInWarmup)

@@ -49,6 +49,15 @@ var config bool  bAllowRestartVoteEvenIfMapVotingIsTurnedOff;
 var config int CapBonus, FlagKillBonus, CoverBonus, SealBonus, GrabBonus, MinimalCapBonus;
 var config float BaseReturnBonus, MidReturnBonus, EnemyBaseReturnBonus, CloseSaveReturnBonus;
 
+var config byte CoverMsgType;
+var config byte CoverSpreeMsgType;
+var config byte SealMsgType;
+var config byte SavedMsgType;
+
+var config bool bShowSealRewardConsoleMsg;
+var config bool bShowAssistConsoleMsg;
+
+
 /* ----Known issues ----
    Mutant:  No Bskins/Forcemodel
    Invasion:  No Bskins/forcemodel on bots (but will on players), no warmup, no custom scoreboard
@@ -153,9 +162,26 @@ function PreBeginPlay()
     SetupVoting();
     SetupColoredDeathMessages();
     StaticSaveConfig();
+    SetupFlags();
     bEnhancedNetCodeEnabledAtStartOfMap = bEnableEnhancedNetCode;
 
     super.PreBeginPlay();
+}
+
+function SetupFlags()
+{
+    local CTFBase FlagBase;
+
+    if (!Level.Game.IsA('xCTFGame'))
+        return;
+
+    ForEach DynamicActors(class 'CTFBase', FlagBase)
+    {
+        if (FlagBase.DefenderTeamIndex == 0)
+            FlagBase.FlagType = class'UTCompCTFv01.UTComp_xRedFlag';
+        else
+            FlagBase.FlagType = class'UTCompCTFv01.UTComp_xBlueFlag';
+    }
 }
 
 function SetupDD()
@@ -688,7 +714,7 @@ function ModifyLogin(out string Portal, out string Options)
     {
         if(bEnableScoreBoard)
         {
-            if (Level.Game.IsA('UTComp_xCTFGame'))
+            if (Level.Game.IsA('xCTFGame'))
                 Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoardCTF";
             else
                 Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoard";
@@ -1131,7 +1157,6 @@ function bool AlwaysKeep (Actor Other)
 	return Super.AlwaysKeep(Other);
 }
 
-
 defaultproperties
 {
      bAddToServerPackages=True
@@ -1273,4 +1298,13 @@ defaultproperties
     MidReturnBonus = 2.000000
     EnemyBaseReturnBonus = 5.000000
     CloseSaveReturnBonus = 10.000000
+
+
+    CoverMsgType = 3
+    CoverSpreeMsgType = 3
+    SealMsgType = 3
+    SavedMsgType = 3
+
+    bShowSealRewardConsoleMsg = true;
+    bShowAssistConsoleMsg = true;
 }
