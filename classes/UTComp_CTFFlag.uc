@@ -20,7 +20,7 @@ function AddFlagCarrier(Controller c)
 
   dt = Level.TimeSeconds - PickupTime;
 
-  Log("AddFlagCarrier"@c.PlayerReplicationInfo.PlayerName@dt);
+  //Log("AddFlagCarrier"@c.PlayerReplicationInfo.PlayerName@dt);
 
   if (c == None || !c.bIsPlayer || (c.PlayerReplicationInfo != None && c.PlayerReplicationInfo.bOnlySpectator))
     return;
@@ -30,7 +30,7 @@ function AddFlagCarrier(Controller c)
     if (FlagCarriers[i].C == c)
     {
       FlagCarriers[i].Time += dt;
-      Log("AddFlagCarrier-Existing"@c.PlayerReplicationInfo.PlayerName@dt);
+      //Log("AddFlagCarrier-Existing"@c.PlayerReplicationInfo.PlayerName@dt);
       return;
     }
   }
@@ -38,7 +38,7 @@ function AddFlagCarrier(Controller c)
   fc.C = c;
   fc.Time = dt;
   FlagCarriers[FlagCarriers.Length] = fc;
-  Log("AddFlagCarrier-New"@c.PlayerReplicationInfo.PlayerName@dt);
+  //Log("AddFlagCarrier-New"@c.PlayerReplicationInfo.PlayerName@dt);
 }
 
 function string CarriedString(float Time, float TotalTime)
@@ -317,14 +317,14 @@ function RewardFlagCarriers()
   for (i = 0; i < FlagCarriers.Length; i++)
     totalTime += FlagCarriers[i].Time;
 
-  Log("RewardFlagCarriers - TotalTime:"@totalTime);
+  //Log("RewardFlagCarriers - TotalTime:"@totalTime);
 
   for (i = 0; i < FlagCarriers.Length; i++)
   {
     if (FlagCarriers[i].C != None)
     {
      
-      Log("RewardFlagCarriers - "@FlagCarriers[i].C.PlayerReplicationInfo.PlayerName@"-"@FlagCarriers[i].Time);
+      //Log("RewardFlagCarriers - "@FlagCarriers[i].C.PlayerReplicationInfo.PlayerName@"-"@FlagCarriers[i].Time);
 
       if (totalTime == 0)
         bonus = 0;
@@ -360,7 +360,7 @@ function RewardFlagCarriers()
 */
 function ResetFlagCarriers()
 {
-  Log("ResetFlagCarriers");
+  //Log("ResetFlagCarriers");
   FlagCarriers.Remove(0, FlagCarriers.Length);
   PickupTime = 0;
 }
@@ -391,14 +391,45 @@ auto state Home
 
     function SameTeamTouch(Controller c)
     {
+      local array<float> scores;
+      local int index;
+      local Controller loopC;
+      local PlayerReplicationInfo loopPRI;
+      local UTComp_CTFFlag otherFlag;
+
       if (C.PlayerReplicationInfo.HasFlag == None || !C.PlayerReplicationInfo.HasFlag.isA('UTComp_CTFFlag'))
         return;
 
-      // Capped the other flag!
-      UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag).ScoreFlag(c);
-      UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag).ReverseStockScoreFlag(c);
+      otherFlag = UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag);
 
+      // Capped the other flag! Doing so, we touched our own so this is where we are at.
+
+      // Back up the scores.
+      for (loopC = Level.ControllerList; loopC != None; loopC = loopC.NextController)
+      {
+        loopPRI = loopC.PlayerReplicationInfo;
+        if (loopPRI != None && loopPRI.Team != None && loopPRI.Team == c.PlayerReplicationInfo.Team)
+        {
+            scores[index++] = loopPRI.Score;
+        }
+      }
+
+      // Do the stock scoring
       Super.SameTeamTouch(c);
+
+      // Reverse the scoring
+      index = 0;
+      for (loopC = Level.ControllerList; loopC != None; loopC = loopC.NextController)
+      {
+        loopPRI = loopC.PlayerReplicationInfo;
+        if (loopPRI != None && loopPRI.Team != None && loopPRI.Team == c.PlayerReplicationInfo.Team)
+        {
+            loopPRI.Score = scores[index++];
+        }
+      }
+
+      otherFlag.ScoreFlag(c);
+      //UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag).ReverseStockScoreFlag(c);
     }
 }
 

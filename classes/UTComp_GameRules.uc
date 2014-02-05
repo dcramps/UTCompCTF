@@ -212,14 +212,19 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
                 // d) The victim is 1024uu close to the FC and the killer can see the FC
                 // e) The victim is 768uu close and is in line-of-sight of the FC (but not necessarely looking at him).
                 
+                Log("_Killer:" @ killerPRI.PlayerName);
+                Log("_Killer FC:" @ killerTeamFC.PlayerReplicationInfo.PlayerName);
+                Log("KillerTeamFCPosition:"@killerTeamFCPosition);
+                Log("KillerLocation:"@Killer.Location);
                 Log("__Distance Victim-FC:" @ VSize(Victim.Location - killerTeamFCPosition));
-                Log("__Distance Killer-FC:" @ VSize(Killer.Location - killerTeamFCPosition));
+                Log("__Distance Killer-FC:" @ VSize(Killer.Pawn.Location - killerTeamFCPosition));
                 Log("__VictimCanSeeFC:" @ Victim.Controller.CanSee(killerTeamFC));
+                Log("__KillerCanSeeFC:" @ Killer.CanSee(killerTeamFC));
                 Log("__VictimLOSFC:" @ Victim.Controller.lineOfSightTo(killerTeamFC));
 
                 // I actually increased the numbers by 20%. Those (in the comments) were the UT99 numbers
                 if ((VSize(Victim.Location - killerTeamFCPosition) < 614.4)
-                 || (VSize(Killer.Location - killerTeamFCPosition) < 614.4)
+                 || (VSize(Killer.Pawn.Location - killerTeamFCPosition) < 614.4)
                  || (VSize(Victim.Location - killerTeamFCPosition) < 1843.2 && Victim.Controller.CanSee(killerTeamFC))
                  || (VSize(Victim.Location - killerTeamFCPosition) < 1228.8 && Killer.CanSee(killerTeamFC))
                  || (VSize(Victim.Location - killerTeamFCPosition) < 921.6 && Victim.Controller.lineOfSightTo(killerTeamFC)))
