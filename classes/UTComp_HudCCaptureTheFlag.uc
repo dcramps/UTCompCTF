@@ -167,6 +167,11 @@ simulated function OldDrawCrosshair(Canvas C)
 	DrawEnemyName(C);
 }
 
+function GetLocalStatsScreen()
+{
+	LocalStatsScreen = Spawn(class'UTCompCTFv01.UTComp_CTFStatsScreen', Owner);
+}
+
 simulated function DrawTimer(Canvas C)
 {
 	local GameReplicationInfo GRI;

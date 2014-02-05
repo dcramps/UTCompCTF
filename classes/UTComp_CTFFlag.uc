@@ -332,7 +332,7 @@ function RewardFlagCarriers()
         bonus = (FlagCarriers[i].Time / totalTime) * (7 + class'UTCompCTFv01.MutUTComp'.Default.CapBonus);
 
       // At least 5 points for the capper
-      if (FlagCarriers[i].C == Holder.Controller)
+      if (FlagCarriers[i].C == OldHolder.Controller)
       {
         bonus = Max(bonus, class'UTCompCTFv01.MutUTComp'.Default.MinimalCapBonus);
 
@@ -401,6 +401,7 @@ auto state Home
         return;
 
       otherFlag = UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag);
+      otherFlag.OldHolder = otherFlag.Holder;
 
       // Capped the other flag! Doing so, we touched our own so this is where we are at.
 
