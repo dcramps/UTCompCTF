@@ -14,20 +14,24 @@ var Font FontArrayFonts[9];
 var localized string FontArrayNames[9];
 
 //Font indices
-var int FONT_PLAYER_PING;//      = 1;
-var int FONT_PLAYER_PL;//        = 1;
-var int FONT_PLAYER_LOCATION;// = 4;
-var int FONT_PLAYER_STAT_NUM;// = 4;
-var int FONT_PLAYER_STAT;// = 3;
-var int FONT_PLAYER_SCORE;// = 7;
-var int FONT_PLAYER_NAME;// = 6;
-var int FONT_TEAM_PING_NUM;// = 2;
-var int FONT_TEAM_PL_NUM;// = 2;
-var int FONT_TEAM_POWERUP_NUM;// = 2;
-var int FONT_TEAM_PING;// = 3;
-var int FONT_TEAM_PL;// = 3;
-var int FONT_TEAM_POWERUP_PER;// = 5;
-var int FONT_TEAM_SCORE;// = 7;
+var int FONT_PLAYER_PING;
+var int FONT_PLAYER_PL;
+var int FONT_PLAYER_LOCATION;
+var int FONT_PLAYER_STAT_NUM;
+var int FONT_PLAYER_STAT;
+var int FONT_PLAYER_SCORE;
+var int FONT_PLAYER_NAME;
+var int FONT_TEAM_PING_NUM;
+var int FONT_TEAM_PL_NUM;
+var int FONT_TEAM_POWERUP_NUM;
+var int FONT_TEAM_PING;
+var int FONT_TEAM_PL;
+var int FONT_TEAM_POWERUP_PER;
+var int FONT_TEAM_SCORE;
+
+//Materials for backgrounds
+var material TeamBoxMaterial;
+var material TeamHeaderMaterial;
 
 /*
  * Draw the map title, ie "Capture the Flag on Grendelkeep"
@@ -180,6 +184,7 @@ simulated event UpdateScoreBoard(Canvas C)
   //DrawMapTitle(C);
 
   DrawTeamHeaders(C);
+  DrawCTFTeamInfoBoxes(C, RedPlayerCount, BluePlayerCount);
 
   C.SetDrawColor(255,255,255,255);
 
@@ -253,7 +258,7 @@ simulated function DrawLogo(Canvas C , float scale)
 	C.SetPos(0,0);
   C.Style=5;
   C.SetDrawColor(255,255,255,180);
-  C.DrawTileStretched(material'Engine.BlackTexture',C.ClipX,C.ClipY*0.066);
+  C.DrawTileStretched(TeamHeaderMaterial,C.ClipX,C.ClipY*0.066);
 
   // TCM Logo
   C.SetPos(0,0);
@@ -283,16 +288,16 @@ simulated function DrawTeamHeaders(Canvas C)
   //Middle screen divider (debug...where is my #ifdef DEBUG?)
   SetPosScaled(C, 959, 0);
   C.SetDrawColor(255,0,0,255);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', 3, 1080);
+  DrawTileStretchedScaled(C, TeamHeaderMaterial, 3, 1080);
 
   //Main header Red
   C.SetDrawColor(0,0,0,90);
   SetPosScaled(C, redBaseX, baseY);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', baseWidth, baseHeight);
+  DrawTileStretchedScaled(C, TeamHeaderMaterial, baseWidth, baseHeight);
 
   //Main header blue
   SetPosScaled(C, blueBaseX, baseY);
-  DrawTileStretchedScaled(C, material'Engine.BlackTexture', baseWidth, baseHeight);
+  DrawTileStretchedScaled(C, TeamHeaderMaterial, baseWidth, baseHeight);
 
   //Score
   C.SetDrawColor(255, 255, 255, 255);
@@ -312,9 +317,50 @@ simulated function DrawTeamHeaders(Canvas C)
 /*
  * Draw the background boxes for each player.
  */
-simulated function DrawTeamInfoBox(Canvas C, float startX, float startY, int teamNum, float scale, int playerCount)
+simulated function DrawCTFTeamInfoBoxes(Canvas C, int redPlayerCount, int bluePlayerCount)
 {
-  Super.DrawTeamInfoBox(C, startX, startY, teamNum, scale, playerCount);
+  local int baseHeight, baseWidth, baseY, redBaseX, blueBaseX;
+  local int x;
+  local int alpha;
+
+  baseHeight = 85;
+  baseWidth  = 840;
+  baseY      = 110+75; //offset+height of header
+  redBaseX   = 95;
+  blueBaseX  = 985;
+
+  C.Style = ERenderStyle.STY_Alpha;
+
+  //Red players
+  for (x = 0; x < redPlayerCount; x++) {
+    //x % 2 == 0 ? alpha = 64 : alpha = 84;
+    if (x % 2 == 0) {
+      alpha = 64;
+    } else {
+      alpha = 84;
+    }
+
+    C.SetDrawColor(255, 0, 0, alpha);
+    
+    SetPosScaled(C, redBaseX, baseY + x*baseHeight);
+    DrawTileStretchedScaled(C, TeamBoxMaterial, baseWidth, baseHeight);
+  }
+
+
+  //Blue players
+  for (x = 0; x < bluePlayerCount; x++) {
+    //x % 2 == 0 ? alpha = 64 : alpha = 84;
+    if (x % 2 == 0) {
+      alpha = 64;
+    } else {
+      alpha = 84;
+    }
+
+    C.SetDrawColor(0, 0, 255, alpha);
+
+    SetPosScaled(C, blueBaseX, baseY + x*baseHeight);
+    DrawTileStretchedScaled(C, TeamBoxMaterial, baseWidth, baseHeight);
+  }
 }
 
 
@@ -504,4 +550,7 @@ defaultproperties
   FontArrayNames(6)  = "UT2003Fonts.FontEurostile29"
   FontArrayNames(7)  = "UT2003Fonts.FontEurostile37"
   FontArrayNames(8)  = "Engine.DefaultFont"
+
+  TeamBoxMaterial = Material'Engine.WhiteTexture'
+  TeamHeaderMaterial = Material'Engine.BlackTexture'
 }
