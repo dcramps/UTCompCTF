@@ -57,6 +57,7 @@ var config byte SavedMsgType;
 var config bool bShowSealRewardConsoleMsg;
 var config bool bShowAssistConsoleMsg;
 
+var config int SuicideInterval;
 
 /* ----Known issues ----
    Mutant:  No Bskins/Forcemodel
@@ -839,6 +840,8 @@ function ParseURL(string Url)
    local array<string> Parts;
    local int i;
 
+   local string SuicideIntervalString;
+
 
     Split(Url, "?", Parts);
 
@@ -864,6 +867,10 @@ function ParseURL(string Url)
                GrenadesOnSpawn=Right(Parts[i], Len(Parts[i])-Len("GrenadesOnSpawn")-1);
            if(Left(Parts[i],Len("EnableEnhancedNetcode"))~= "EnableEnhancedNetcode")
                EnableEnhancedNetcode=Right(Parts[i], Len(Parts[i])-Len("EnableEnhancedNetcode")-1);
+            
+            if (Left(Parts[i], Len("SuicideInterval")) ~= "SuicideInterval") {
+                SuicideIntervalString = Right(Parts[i], Len(Parts[i]) - Len("SuicideInterval") - 1);
+            }
        }
    }
  //  Log("DD Value"$DD);
@@ -915,6 +922,12 @@ function ParseURL(string Url)
        bEnhancedNetCodeEnabledAtStartOfMap=default.bEnableEnhancedNetcode;
        bEnableEnhancedNetcode = default.bEnableEnhancedNetCode;
    }
+
+    if (SuicideIntervalString != "") {
+        default.SuicideInterval = Int(SuicideIntervalString);
+        SuicideInterval = default.SuicideInterval;
+    }
+
    StaticSaveConfig();
 }
 function AutoDemoRecord()
@@ -1320,4 +1333,6 @@ defaultproperties
 
     bShowSealRewardConsoleMsg = true;
     bShowAssistConsoleMsg = true;
+
+    SuicideInterval = 3
 }

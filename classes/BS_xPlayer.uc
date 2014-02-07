@@ -2813,10 +2813,10 @@ defaultproperties
 //Additions for UTCompCTF
 //--------------------------
 
-//Override to remove suicide timer.
+//Override to modify suicide timer
 exec function Suicide()
 {
-  if (Pawn != None) {
+  if ((Pawn != None) && (Level.TimeSeconds - Pawn.LastStartTime > class'UTCompCTFv01.MutUTComp'.Default.SuicideInterval)) {
     Pawn.Suicide();
   }
 }
