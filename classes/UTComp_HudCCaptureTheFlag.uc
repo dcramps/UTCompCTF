@@ -1,6 +1,12 @@
 
 class UTComp_HudCCaptureTheFlag extends HudCCaptureTheFlag;
 
+simulated function DrawSpectatingHud (Canvas C)
+{
+	Super.DrawSpectatingHud(c);
+	DrawTimer(C);
+}
+
 simulated function UpdatePrecacheMaterials()
 {
 	local int i;
@@ -22,7 +28,6 @@ function DisplayEnemyName(Canvas C, PlayerReplicationInfo PRI)
 {
 	PlayerOwner.ReceiveLocalizedMessage(class'UTComp_PlayerNameMessage',0,PRI);
 }
-
 
 simulated function DrawUTCompCrosshair (Canvas C)
 {
@@ -174,6 +179,7 @@ function GetLocalStatsScreen()
 
 simulated function DrawTimer(Canvas C)
 {
+
 	local GameReplicationInfo GRI;
 	local int Minutes, Hours, Seconds;
     local UTComp_Warmup uWarmup;

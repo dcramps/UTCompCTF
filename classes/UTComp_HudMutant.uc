@@ -2,6 +2,12 @@
 
 class UTComp_HudMutant extends HudMutant;
 
+simulated function DrawSpectatingHud (Canvas C)
+{
+	Super.DrawSpectatingHud(c);
+	DrawTimer(C);
+}
+
 simulated function UpdatePrecacheMaterials()
 {
 	local int i;

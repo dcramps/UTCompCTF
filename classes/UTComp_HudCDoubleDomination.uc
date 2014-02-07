@@ -2,6 +2,11 @@
 
 class UTComp_HudCDoubleDomination extends HudCDoubleDomination;
 
+simulated function DrawSpectatingHud (Canvas C)
+{
+	Super.DrawSpectatingHud(c);
+	DrawTimer(C);
+}
 
 simulated function UpdatePrecacheMaterials()
 {

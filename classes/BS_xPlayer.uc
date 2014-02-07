@@ -1248,27 +1248,64 @@ function bool ServerNextPlayer(int teamindex)
    }
 }
 
-exec function GoToItem(string PickupString)
+exec function GoToItem(string CmdLine)
 {
-  if(IsCoaching())
-     return;
-  if(PickupString ~= "50" || PickupString ~="Small"
-  || PickupString ~="50a")
-     ServerGoToWepBase(class'XPickups.ShieldPack');
-  else if(PickupString ~="100" || PickupString ~="100a"
-  || PickupString ~="Large" || PickupString ~="Big")
-     ServerGoToWepBase(class'XPickups.SuperShieldPack');
-  else if(PickupString ~="DD" || PickupString ~="Amp"
-  || PickupString ~="Double-Damage" || PickupString ~="DoubleDamage")
-     ServerGoToWepBase(class'XPickups.UDamagePack');
+
+  local string pickup;
+  local string team;
+  local class<Pickup> pickupClass;
+  local int teamNum;
+
+  teamNum = -1;
+
+  if (IsCoaching())
+    return;
+
+  if (!Divide(CmdLine," ", pickup, team))
+    pickup = CmdLine;
+
+
+  if(pickup ~= "50" || pickup ~= "Small" || pickup ~= "50a")
+    pickupClass = class'XPickups.ShieldPack';
+  else if(pickup ~= "100" || pickup ~= "100a" || pickup ~= "Large" || pickup ~="Big")
+    pickupClass = class'XPickups.SuperShieldPack';
+  else if(pickup ~= "DD" || pickup ~= "Amp" || pickup ~= "Double-Damage" || pickup ~= "DoubleDamage")
+    pickupClass = class'XPickups.UDamagePack';
+  else if (pickup ~= "keg")
+    pickupClass = class'XPickups.UDamagePack';
+
+  if (pickupClass == None)
+    return;
+
+  if (team ~= "0" || team ~= "red")
+    teamNum = 0;
+  else if (team ~= "1" || team ~= "blue")
+    teamNum = 1;
+
+  ServerGoToWepBase(pickupClass, teamNum);
 }
 
-function ServerGoToWepBase(class<Pickup> theClass)
+function bool IsInZone(Actor a, int team)
+{
+  local string loc;
+
+  loc = a.Region.Zone.LocationName;
+
+  if (team == 0) 
+    return (Instr(Caps(loc), "RED" ) != -1);
+  else 
+    return (Instr(Caps(loc), "BLUE") != -1);
+
+  return false;
+}
+
+function ServerGoToWepBase(class<Pickup> theClass, int team)
 {
    local xPickupBase xPBase;
+
    foreach allactors(class'xPickupBase', xPBase)
    {
-     if(xPBase.PowerUp == theClass)
+     if (xPBase.PowerUp == theClass)
      {
         ServerSetViewTarget(xPBase);
         break;

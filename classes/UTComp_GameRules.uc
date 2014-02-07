@@ -63,45 +63,62 @@ function int NetDamage( int OriginalDamage, int Damage, pawn injured, pawn insti
 	return Damage;
 }
 
+function LogPickup(Pawn other, Pickup item)
+{
+    UTCompMutator.RepInfo.LogPickup(other, item);
+}
 
 function bool OverridePickupQuery(Pawn Other, Pickup item, out byte bAllowPickup)
 {
     local UTComp_PRI uPRI;
+    
+    uPRI = class'UTComp_Util'.Static.GetUTCompPRIForPawn(Other);
 
-    uPRI=class'UTComp_Util'.Static.GetUTCompPRIForPawn(Other);
-
-    if(uPRI!=None && UTCompMutator.bEnablePowerupStats)
+    if (uPRI != None && UTCompMutator.bEnablePowerupStats)
     {
-        if(Item.IsA('ShieldPack'))
+        if (Item.IsA('ShieldPack'))
         {
             if(!Level.Game.bTeamGame || !Other.IsA('xPawn') || xPawn(Other).CanUseShield(50)!=0)
+            {
                 uPRI.PickedUpFifty++;
+            }
         }
-        else if(Item.IsA('SuperShieldPack'))
+        else if (Item.IsA('SuperShieldPack'))
+        {
             uPRI.PickedUpHundred++;
-        else if(Item.IsA('SuperHealthPack'))
-        {
-            if(Other.Health<Other.SuperHealthMax)
-                uPRI.PickedUpKeg++;
+            LogPickup(other, item);
         }
-        else if(Item.IsA('HealthPack'))
+        else if (Item.IsA('SuperHealthPack'))
         {
-            if(Other.Health<Other.HealthMax)
+            if(Other.Health < Other.SuperHealthMax)
+            {
+                uPRI.PickedUpKeg++;
+                LogPickup(other, item);
+            }
+        }
+        else if (Item.IsA('HealthPack'))
+        {
+            if(Other.Health < Other.HealthMax)
             {
                 uPRI.PickedUpHealth++;
             }
         }
-        else if(Item.IsA('MiniHealthPack'))
+        else if (Item.IsA('MiniHealthPack'))
         {
-            if(Other.Health<Other.SuperHealthMax)
+            if(Other.Health < Other.SuperHealthMax)
             {
                 uPRI.PickedUpVial++;
             }
         }
-        else if(Item.IsA('UDamagePack'))
+        else if (Item.IsA('UDamagePack'))
+        {
             uPRI.PickedUpAmp++;
-        else if(Item.IsA('AdrenalinePickup'))
-            uPRI.PickedUpAdren+= AdrenalinePickup(Item).AdrenalineAmount/2;
+            LogPickup(other, item);
+        }
+        else if (Item.IsA('AdrenalinePickup'))
+        {
+            uPRI.PickedUpAdren += AdrenalinePickup(Item).AdrenalineAmount/2;
+        }
     }
 
     if ( (NextGameRules != None) &&  NextGameRules.OverridePickupQuery(Other, item, bAllowPickup) )

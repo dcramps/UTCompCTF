@@ -2,6 +2,11 @@
 
 class UTComp_HudCBombingRun extends HudCBombingRun;
 
+simulated function DrawSpectatingHud (Canvas C)
+{
+	Super.DrawSpectatingHud(c);
+	DrawTimer(C);
+}
 
 simulated function UpdatePrecacheMaterials()
 {

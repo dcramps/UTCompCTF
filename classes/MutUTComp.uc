@@ -478,6 +478,7 @@ function SpawnReplicationClass()
     if(RepInfo==None)
         RepInfo=Spawn(class'UTComp_ServerReplicationInfo', self);
 
+    RepInfo.PopulatePowerups();
     RepInfo.bEnableVoting=bEnableVoting;
     RepInfo.EnableBrightSkinsMode=Clamp(EnableBrightSkinsMode,1,3);
     RepInfo.bEnableClanSkins=bEnableClanSkins;
@@ -551,6 +552,7 @@ function PostBeginPlay()
 
 
 }
+
 
 simulated function bool InStrNonCaseSensitive(String S, string S2)
 {
@@ -1156,6 +1158,17 @@ function bool AlwaysKeep (Actor Other)
 	}
 	return Super.AlwaysKeep(Other);
 }
+
+
+// // Spectating-related
+// function AddPickupDoubleDamage(Pawn other)
+// {
+
+//     if (other.Controller.GetTeamNum() == 0)
+//         pickup
+
+
+// }
 
 defaultproperties
 {

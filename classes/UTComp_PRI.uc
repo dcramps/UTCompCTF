@@ -70,14 +70,15 @@ struct TeamOverlayInfo
 {
     var byte Armor;
     var byte Weapon;
+    var byte bHasDD;
     var int Health;
     var PlayerReplicationInfo PRI;
 };
 
-var byte bHasDD[iMAXPLAYERS];
 
+var TeamOverlayInfo OverlayInfoRed[iMAXPLAYERS];
+var TeamOverlayInfo OverlayInfoBlue[iMAXPLAYERS];
 
-var TeamOverlayInfo OverlayInfo[iMAXPLAYERS];
 
 var bool bMapListCompleted;
 
@@ -92,6 +93,7 @@ replication
          ColoredName, RealKills,
          FlagGrabs, FlagCaps, FlagPickups, FlagKills,
          Assists, Covers, CoverSpree, Seals, SealSpree, DefKills;
+
     unreliable if(Role==Role_Authority && bNetOwner)
         PickedUpFifty, PickedUpHundred, PickedUpAmp,
         PickedUpVial, PickedUpHealth, PickedUpKeg,
@@ -100,11 +102,14 @@ replication
 
     unreliable if(Role==Role_Authority && bNetOwner && bSendWepStats)
         NormalWepStatsPrim, NormalWepStatsAlt;
+
     unreliable if(Role==Role_Authority && bNetOwner)
-        OverlayInfo, VotedYes, VotedNo, bHasDD;
+        OverlayInfoRed, OverlayInfoBlue, VotedYes, VotedNo;
+
     reliable if(Role<Role_Authority)
         Ready, NotReady, SetVoteMode, SetCoachTeam,
         CallVote, PassVote, SetColoredName, SetShowSelf, GetMapList, ReplyToMapSend;
+        
     reliable if(Role==Role_Authority && bNetOwner)
         MapListSend, SendTotalMapNumber;
 }
