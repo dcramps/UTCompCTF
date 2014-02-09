@@ -5,6 +5,7 @@ var config bool bEnableBrightskinsVoting;
 var config bool bEnableHitsoundsVoting;
 var config bool bEnableWarmupVoting;
 var config bool bEnableTeamOverlayVoting;
+var config bool bEnablePowerupsOverlayVoting;
 var config bool bEnableMapVoting;
 var config bool bEnableGametypeVoting;
 var config bool bEnableTimedOvertimeVoting;
@@ -17,6 +18,7 @@ var config bool bEnableDoubleDamage;
 var config byte EnableBrightSkinsMode;
 var config bool bEnableClanSkins;
 var config bool bEnableTeamOverlay;
+var config bool bEnablePowerupsOverlay;
 var config byte EnableHitSoundsMode;
 var config bool bEnableScoreboard;
 var config bool bEnableWarmup;
@@ -88,6 +90,16 @@ var float counter;
 var controller countercontroller;
 var pawn counterpawn;
 
+struct PowerupInfoStruct
+{
+    var xPickupBase PickupBase;
+    var int Team;
+    var float NextRespawnTime;
+    var PlayerReplicationInfo LastTaker;
+};
+
+var PowerupInfoStruct PowerupInfo[8];
+
 
 /*    List Of Features to be completed(see utcomp_v2.txt for details)
 ========Not Started========
@@ -156,19 +168,198 @@ var string WeaponPickupClassNames[12];
 
 function PreBeginPlay()
 {
-
-    SetupDD();
     ReplacePawnAndPC();
     SetupStats();
     SetupVoting();
     SetupColoredDeathMessages();
     StaticSaveConfig();
     SetupFlags();
+    SetupPowerupInfo();
     bEnhancedNetCodeEnabledAtStartOfMap = bEnableEnhancedNetCode;
 
     super.PreBeginPlay();
 }
 
+function SetupPowerupInfo()
+{
+    local xPickupBase pickupBase;
+    local int i;
+    local byte shieldPickupCount;
+    local byte uDamagePickupCount;
+    local byte kegPickupCount;
+    local bool forceTeam; // Force finding a team if there's 2 powerups of the same type.
+    local bool mustTryAgain;
+
+    foreach AllActors(class'xPickupBase', pickupBase)
+    {
+
+        if (pickupBase.PowerUp == class'XPickups.SuperShieldPack' || pickupBase.PowerUp == class'XPickups.SuperHealthPack' || pickupBase.PowerUp == class'XPickups.UDamagePack')
+        {
+            PowerupInfo[i].PickupBase = pickupBase;
+            
+            if (pickupBase.myPickUp != None)
+                PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + pickupBase.myPickUp.GetRespawnTime();
+
+            if (pickupBase.PowerUp == class'XPickups.SuperShieldPack')
+                shieldPickupCount++;
+            else if (pickupBase.PowerUp == class'XPickups.SuperHealthPack')
+                kegPickupCount++;
+            else if (pickupBase.PowerUp == class'XPickups.UDamagePack')
+                uDamagePickupCount++;
+
+            i++;
+
+            if (i == 8)
+            break;
+        }
+    }
+
+    for (i = 0; i < 8; i++)
+    {
+        if (PowerupInfo[i].PickupBase == None)
+            break;
+        
+        forceTeam = false;
+
+        if (PowerupInfo[i].PickupBase.PowerUp == class'XPickups.SuperShieldPack' && shieldPickupCount == 2)
+            forceTeam = true;
+        else if (PowerupInfo[i].PickupBase.PowerUp == class'XPickups.SuperHealthPack' && kegPickupCount == 2)
+            forceTeam = true;
+        else if (PowerupInfo[i].PickUpBase.PowerUp == class'XPickups.UDamagePack' && uDamagePickupCount == 2)
+            forceTeam = true;
+
+        PowerupInfo[i].Team = GetTeamNum(PowerupInfo[i].PickupBase, forceTeam);
+    }
+
+}
+
+function LogPickup(Pawn other, Pickup item)
+{
+    local int i;
+
+    for (i = 0; i < 8; i++)
+    {
+      if (PowerupInfo[i].PickupBase == None)
+          break;
+
+      if (PowerupInfo[i].PickupBase.myPickup == item)
+      {
+          Log("Pickup taken:"@item);
+          PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + item.GetRespawnTime() - item.RespawnEffectTime;
+          PowerupInfo[i].LastTaker = other.PlayerReplicationInfo;
+      }
+    }
+
+    if (i > 0)
+    {
+      SortPowerupInfo(0, i - 1); 
+      Log("Sort"@0@"to"@(i-1));
+    }
+}
+
+function SortPowerupInfo(int low, int high)
+{
+  //  low is the lower index, high is the upper index
+  //  of the region of array a that is to be sorted
+  local Int i, j;
+  local float x;
+  Local PowerupInfoStruct Temp;
+
+  i = Low;
+  j = High;
+  x = PowerupInfo[(Low + High) / 2].NextRespawnTime;
+
+  //  partition
+  do
+  {
+   while (PowerupInfo[i].NextRespawnTime < x)
+      i += 1;
+    while ((PowerupInfo[j].NextRespawnTime > x) && (x > 0))
+     j -= 1;
+
+    if (i <= j)
+    {
+     // swap array elements, inlined
+     Temp = PowerupInfo[i];
+      PowerupInfo[i] = PowerupInfo[j];
+      PowerupInfo[j] = Temp;
+      i += 1; 
+      j -= 1;
+    }
+  } until (i > j);
+
+  //  recursion
+  if (low < j)
+    SortPowerupInfo(low, j);
+  if (i < high)
+    SortPowerupInfo(i, high);
+}
+
+function int GetTeamNum(Actor a, bool forceTeam)
+{
+    local string locationName;
+    local Volume V;
+    local Volume Best;
+    local CTFBase FlagBase;
+    local CTFBase RedFlagBase;
+    local CTFBase BlueFlagBase;
+
+    locationName = a.Region.Zone.LocationName;
+    
+    if (Instr(Caps(locationName), "RED" ) != -1)
+        return 0;
+    
+    if (Instr(Caps(locationName), "BLUE" ) != -1)
+        return 1;
+
+    // For example the 100 in Citadel, we need to find in what volume it is.
+    foreach AllActors( class'Volume', V )
+    {
+        if( V.LocationName == "" || V.LocationName == class'Volume'.default.LocationName)
+            continue;
+
+        if( (Best != None) && (V.LocationPriority <= Best.LocationPriority) )
+            continue;
+
+        if( V.Encompasses(a) )
+            Best = V;
+    }
+
+    if (Best != None)
+    {
+        Log("BestName"@a@Best.LocationName);
+        if (Instr(Caps(Best.LocationName), "RED" ) != -1)
+            return 0;
+        if (Instr(Caps(Best.LocationName), "BLUE" ) != -1)
+            return 1;
+    }
+
+    if (forceTeam && Level.Game.IsA('xCTFGame'))
+    {
+        // Well we will look at the distance from the flag base...
+        
+
+        ForEach DynamicActors(class 'CTFBase', FlagBase)
+        {
+            if (FlagBase.DefenderTeamIndex == 0)
+                RedFlagBase = flagBase;
+            else
+                BlueFlagBase = flagBase;
+        }
+
+        if (RedFlagBase != None && BlueFlagBase != None)
+        {
+            if (VSize(a.Location - RedFlagBase.Location) < VSize(a.Location - BlueFlagBase.Location))
+                return 0;
+            else 
+                return 1;
+        }
+    }
+
+    return 255;
+}
+
+/* Change the flags the the UTComp one so we can track caps and assists. */
 function SetupFlags()
 {
     local CTFBase FlagBase;
@@ -185,11 +376,6 @@ function SetupFlags()
     }
 }
 
-function SetupDD()
-{
-   //if(Level.Game.IsA('UTComp_Duel'))
-   //   bEnableDoubleDamage=UTComp_Duel(Level.Game).bEnableDoubleDamage;
-}
 
 function SetupColoredDeathMessages()
 {
@@ -202,9 +388,9 @@ function SetupColoredDeathMessages()
 function ModifyPlayer(Pawn Other)
 {
     local inventory inv;
-    local int i;
+    local int i;    
 
-    if(WarmupClass!=None && !Level.Game.IsA('UTComp_ClanArena')&& (WarmupClass.bInWarmup==True || WarmupClass.bGivePlayerWeaponHack ))                       //Give all weps if its warmup
+    if(WarmupClass!=None && !Level.Game.IsA('UTComp_ClanArena')&& (WarmupClass.bInWarmup==True || WarmupClass.bGivePlayerWeaponHack ))  //Give all weps if its warmup
     {
          switch(EnableWarmupWeaponsMode)
          {
@@ -299,7 +485,7 @@ static function bool IsPredicted(actor A)
 
 function SetupTeamOverlay()
 {
-    if(!bEnableTeamOverlay || !Level.Game.bTeamGame)
+    if((!bEnableTeamOverlay && !bEnablePowerupsOverlay) || !Level.Game.bTeamGame)
         return;
     if (OverlayClass==None)
     {
@@ -429,9 +615,9 @@ simulated function Tick(float DeltaTime)
         return;
     PC=Level.GetLocalPlayerController();
 
-    if(PC!=None)
+    if (PC!=None)
     {
-        PC.Player.InteractionMaster.AddInteraction("UTCompCTFv01.UTComp_Overlay", PC.Player);
+        BS_xPlayer(PC).Overlay = UTComp_Overlay(PC.Player.InteractionMaster.AddInteraction("UTCompCTFv01.UTComp_Overlay", PC.Player));
         bHasInteraction=True;
         class'DamTypeLinkShaft'.default.bSkeletize=false;
     }
@@ -479,11 +665,11 @@ function SpawnReplicationClass()
     if(RepInfo==None)
         RepInfo=Spawn(class'UTComp_ServerReplicationInfo', self);
 
-    RepInfo.PopulatePowerups();
     RepInfo.bEnableVoting=bEnableVoting;
     RepInfo.EnableBrightSkinsMode=Clamp(EnableBrightSkinsMode,1,3);
     RepInfo.bEnableClanSkins=bEnableClanSkins;
     RepInfo.bEnableTeamOverlay=bEnableTeamOverlay;
+    RepInfo.bEnablePowerupsOverlay=bEnablePowerupsOverlay;
     RepInfo.EnableHitSoundsMode=EnableHitSoundsMode;
     RepInfo.bEnableScoreboard=bEnableScoreboard;
     RepInfo.bEnableWarmup=bEnableWarmup;
@@ -493,6 +679,7 @@ function SpawnReplicationClass()
     RepInfo.bEnableHitsoundsVoting=bEnableHitsoundsVoting;
     RepInfo.bEnableWarmupVoting=bEnableWarmupVoting;
     RepInfo.bEnableTeamOverlayVoting=bEnableTeamOverlayVoting;
+    RepInfo.bEnablePowerupsOverlayVoting=bEnablePowerupsOverlayVoting;
     RepInfo.bEnableMapVoting=bEnableMapVoting;
     RepInfo.bEnableGametypeVoting=bEnableGametypeVoting;
     RepInfo.ServerMaxPlayers=ServerMaxPlayers;
@@ -673,7 +860,6 @@ function bool SniperCheckReplacement( Actor Other, out byte bSuperRelevant )
 
 function bool getDoubleDamage()
 {
-   SetupDD();
    return bEnableDoubleDamage;
 }
 
@@ -833,102 +1019,123 @@ function ServerTraveling(string URL, bool bItems)
    Super.ServerTraveling(url, bitems);
 }
 
-function ParseURL(string Url)
+function ParseURL(string url)
 {
-   local string Skinz0r, Sounds, overlay, warmup, dd, TimedOver
-   , TimedOverLength, grenadesonspawn, enableenhancednetcode;
-   local array<string> Parts;
-   local int i;
+  local string skinz0r, sounds, overlay, powerupsOverlay, warmup, dd, timedOver, timedOverLength, grenadesOnSpawn, enableEnhancedNetcode, suicideIntervalString;
+  local array<string> parts;
+  local int i;
 
-   local string SuicideIntervalString;
+  Split(url, "?", parts);
 
+  for (i = 0; i < parts.Length; i++)
+  {
+    if (parts[i] != "")
+    {
+      if (Left(parts[i], Len("BrightSkinsMode")) ~= "BrightSkinsMode")
+        Skinz0r = Right(parts[i], Len(parts[i])-Len("BrightSkinsMode")-1);
 
-    Split(Url, "?", Parts);
+      if (Left(parts[i], Len("HitSoundsMode")) ~= "HitSoundsMode")
+        Sounds = Right(parts[i], Len(parts[i])-Len("HitSoundsMode")-1);
 
-   for(i=0; i<Parts.Length; i++)
-   {
-       if(Parts[i]!="")
-       {
-           if(Left(Parts[i],Len("BrightSkinsMode"))~= "BrightSkinsMode")
-               Skinz0r=Right(Parts[i], Len(Parts[i])-Len("BrightSkinsMode")-1);
-           if(Left(Parts[i],Len("HitSoundsMode"))~= "HitSoundsMode")
-               Sounds=Right(Parts[i], Len(Parts[i])-Len("HitSoundsMode")-1);
-           if(Left(Parts[i],Len("EnableTeamOverlay"))~= "EnableTeamOverlay")
-               Overlay=Right(Parts[i], Len(Parts[i])-Len("EnableTeamOverlay")-1);
-           if(Left(Parts[i],Len("EnableWarmup"))~= "EnableWarmup")
-               Warmup=Right(Parts[i], Len(Parts[i])-Len("EnableWarmup")-1);
-           if(Left(Parts[i],Len("DoubleDamage"))~= "DoubleDamage")
-               DD=Right(Parts[i], Len(Parts[i])-Len("DoubleDamage")-1);
-           if(Left(Parts[i],Len("EnableTimedOverTime"))~= "EnableTimedOverTime")
-               TimedOver=Right(Parts[i], Len(Parts[i])-Len("EnableTimedOverTime")-1);
-           if(Left(Parts[i],Len("TimedOverTimeLength"))~= "TimedOverTimeLength")
-               TimedOverLength=Right(Parts[i], Len(Parts[i])-Len("TimedOverTimeLength")-1);
-           if(Left(Parts[i],Len("GrenadesOnSpawn"))~= "GrenadesOnSpawn")
-               GrenadesOnSpawn=Right(Parts[i], Len(Parts[i])-Len("GrenadesOnSpawn")-1);
-           if(Left(Parts[i],Len("EnableEnhancedNetcode"))~= "EnableEnhancedNetcode")
-               EnableEnhancedNetcode=Right(Parts[i], Len(Parts[i])-Len("EnableEnhancedNetcode")-1);
-            
-            if (Left(Parts[i], Len("SuicideInterval")) ~= "SuicideInterval") {
-                SuicideIntervalString = Right(Parts[i], Len(Parts[i]) - Len("SuicideInterval") - 1);
-            }
-       }
-   }
- //  Log("DD Value"$DD);
-   if(Skinz0r !="" && int(Skinz0r)<4 && int(Skinz0r)>0)
-   {
-       default.EnableBrightskinsMode=Int(Skinz0r);
-       EnableBrightskinsMode = default.EnableBrightskinsMode;
-   }
-   if(Sounds !="" && int(Sounds)<3 && int(Sounds)>=0)
-   {
-       default.EnableHitsoundsMode=Int(Sounds);
-       EnableHitsoundsMode = default.EnableHitsoundsMode;
-   }
-   if(Overlay !="" && (Overlay~="False" || Overlay~="True"))
-   {
-       default.bEnableTeamOverlay=Overlay~="True";
-       bEnableTeamOverlay = default.bEnableTeamOverlay;
-   }
-   if(Warmup !="" && (Warmup~="False" || Warmup~="True"))
-   {
-       default.bEnableWarmup=(Warmup~="True");
-       bEnableWarmup=default.bEnableWarmup;
-   }
-   if(DD !="" && (DD~="False" || DD~="True"))
-   {
-       default.bEnableDoubleDamage=(DD~="True");
-       bEnableDoubleDamage = default.bEnableDoubleDamage;
-   }
-   if(TimedOverLength !="" && int(TimedOverLength)>=0)
-   {
-       if(int(TimedOverLength) == 0)
-          default.bEnableTimedOverTime=false;
-       else
-       {
-          default.TimedOvertimeLength=60*Int(TimedOverLength);
-          default.bEnableTimedOverTime=True;
-       }
-       bEnableTimedOverTime = default.bEnableTimedOverTime;
-       TimedOvertimeLength = default.TimedOvertimeLength;
-   }
-   if(GrenadesOnSpawn !="" && int(GrenadesOnSpawn)<9 && int(GrenadesOnSpawn)>=0)
-   {
-       default.NumGrenadesOnSpawn=Int(GrenadesOnSpawn);
-       NumGrenadesOnSpawn = default.NumGrenadesOnSpawn;
-   }
-   if(EnableEnhancedNetcode !="" && (EnableEnhancedNetcode~="false" || EnableEnhancedNetcode~="True"))
-   {
-       default.bEnableEnhancedNetcode=(EnableEnhancedNetcode~="True");
-       bEnhancedNetCodeEnabledAtStartOfMap=default.bEnableEnhancedNetcode;
-       bEnableEnhancedNetcode = default.bEnableEnhancedNetCode;
-   }
+      if (Left(parts[i],Len("EnableTeamOverlay"))~= "EnableTeamOverlay")
+        Overlay=Right(parts[i], Len(parts[i])-Len("EnableTeamOverlay")-1);
 
-    if (SuicideIntervalString != "") {
-        default.SuicideInterval = Int(SuicideIntervalString);
-        SuicideInterval = default.SuicideInterval;
+      if (Left(parts[i],Len("EnablePowerupsOverlay"))~= "EnablePowerupsOverlay")
+        PowerupsOverlay=Right(parts[i], Len(parts[i])-Len("EnablePowerupsOverlay")-1);
+
+      if (Left(parts[i],Len("EnableWarmup"))~= "EnableWarmup")
+        Warmup=Right(parts[i], Len(parts[i])-Len("EnableWarmup")-1);
+
+      if (Left(parts[i],Len("DoubleDamage"))~= "DoubleDamage")
+        DD=Right(parts[i], Len(parts[i])-Len("DoubleDamage")-1);
+
+      if (Left(parts[i],Len("EnableTimedOverTime"))~= "EnableTimedOverTime")
+        TimedOver=Right(parts[i], Len(parts[i])-Len("EnableTimedOverTime")-1);
+
+      if (Left(parts[i],Len("TimedOverTimeLength"))~= "TimedOverTimeLength")
+        TimedOverLength=Right(parts[i], Len(parts[i])-Len("TimedOverTimeLength")-1);
+
+      if (Left(parts[i],Len("GrenadesOnSpawn"))~= "GrenadesOnSpawn")
+        GrenadesOnSpawn=Right(parts[i], Len(parts[i])-Len("GrenadesOnSpawn")-1);
+
+      if (Left(parts[i],Len("EnableEnhancedNetcode"))~= "EnableEnhancedNetcode")
+        EnableEnhancedNetcode=Right(parts[i], Len(parts[i])-Len("EnableEnhancedNetcode")-1);
+
+      if (Left(parts[i], Len("SuicideInterval")) ~= "SuicideInterval")
+        suicideIntervalString = Right(parts[i], Len(parts[i])-Len("SuicideInterval")-1);
+    }
+  }
+ 
+  if(Skinz0r !="" && int(Skinz0r)<4 && int(Skinz0r)>0)
+  {
+    default.EnableBrightskinsMode=Int(Skinz0r);
+    EnableBrightskinsMode = default.EnableBrightskinsMode;
+  }
+
+  if(Sounds !="" && int(Sounds)<3 && int(Sounds)>=0)
+  {
+    default.EnableHitsoundsMode=Int(Sounds);
+    EnableHitsoundsMode = default.EnableHitsoundsMode;
+  }
+
+  if(Overlay !="" && (Overlay~="False" || Overlay~="True"))
+  {
+    default.bEnableTeamOverlay=Overlay~="True";
+    bEnableTeamOverlay = default.bEnableTeamOverlay;
+  }
+
+  if(PowerupsOverlay !="" && (PowerupsOverlay~="False" || PowerupsOverlay~="True"))
+  {
+    default.bEnablePowerupsOverlay=PowerupsOverlay~="True";
+    bEnablePowerupsOverlay = default.bEnablePowerupsOverlay;
+  }
+
+  if(Warmup !="" && (Warmup~="False" || Warmup~="True"))
+  {
+    default.bEnableWarmup=(Warmup~="True");
+    bEnableWarmup=default.bEnableWarmup;
+  }
+
+  if(DD !="" && (DD~="False" || DD~="True"))
+  {
+    default.bEnableDoubleDamage=(DD~="True");
+    bEnableDoubleDamage = default.bEnableDoubleDamage;
+  }
+
+  if(TimedOverLength !="" && int(TimedOverLength)>=0)
+  {
+    if(int(TimedOverLength) == 0)
+      default.bEnableTimedOverTime=false;
+    else
+    {
+      default.TimedOvertimeLength=60*Int(TimedOverLength);
+      default.bEnableTimedOverTime=True;
     }
 
-   StaticSaveConfig();
+    bEnableTimedOverTime = default.bEnableTimedOverTime;
+    TimedOvertimeLength = default.TimedOvertimeLength;
+  }
+
+  if (GrenadesOnSpawn !="" && int(GrenadesOnSpawn)<9 && int(GrenadesOnSpawn)>=0)
+  {
+    default.NumGrenadesOnSpawn=Int(GrenadesOnSpawn);
+    NumGrenadesOnSpawn = default.NumGrenadesOnSpawn;
+  }
+
+  if(EnableEnhancedNetcode !="" && (EnableEnhancedNetcode~="false" || EnableEnhancedNetcode~="True"))
+  {
+    default.bEnableEnhancedNetcode=(EnableEnhancedNetcode~="True");
+    bEnhancedNetCodeEnabledAtStartOfMap=default.bEnableEnhancedNetcode;
+    bEnableEnhancedNetcode = default.bEnableEnhancedNetCode;
+  }
+
+  if (suicideIntervalString != "")
+  {
+    default.SuicideInterval = Int(suicideIntervalString);
+    SuicideInterval = default.SuicideInterval;
+  }
+
+  StaticSaveConfig();
 }
 function AutoDemoRecord()
 {
@@ -1057,6 +1264,7 @@ static function FillPlayInfo (PlayInfo PlayInfo)
     PlayInfo.AddSetting("UTComp Settings", "bEnableDoubleDamage", "Enable Double Damage", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableAutoDemoRec", "Enable Serverside Demo-Recording", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlay", "Enable Team Overlay", 1, 1, "Check");
+    PlayInfo.AddSetting("UTComp Settings", "bEnablePowerupsOverlay", "Enable Powerups Overlay for spectators", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableEnhancedNetcode", "Enable Enhanced Netcode", 1, 1, "Check");
     PlayInfo.AddSetting("UTComp Settings", "ServerMaxPlayers", "Voting Max Players",255, 1, "Text","2;0:32",,True,True);
     PlayInfo.AddSetting("UTComp Settings", "NumGrenadesOnSpawn", "Number of grenades on spawn.",255, 1, "Text","2;0:32",,True,True);
@@ -1066,6 +1274,7 @@ static function FillPlayInfo (PlayInfo PlayInfo)
     PlayInfo.AddSetting("UTComp Settings", "bEnableWarmupVoting", "Allow players to vote on Warmup setting.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableHitsoundsVoting", "Allow players to vote on Hitsounds settings.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlayVoting", "Allow players to vote on team overlay setting", 1, 1,"Check");
+    PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlayVoting", "Allow players to vote on powerups overlay setting", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableEnhancedNetcodeVoting", "Allow players to vote on enhanced netcode setting", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableMapVoting", "Allow players to vote for map changes.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "WarmupTime", "Warmup Time",1, 1, "Text","0;0:1800",,True,True);
@@ -1087,11 +1296,13 @@ static event string GetDescriptionText(string PropName)
         case "ServerMaxPlayers":  return "Set this to the maximum number of players you wish for to allow a client to vote for.";
         case "NumGrenadesOnSpawn":  return "Set this to the number of Assault Rifle grenades you wish a player to spawn with.";
         case "bEnableTeamOverlay": return "Check this to enable the team overlay.";
+        case "bEnablePowerupsOverlay": return "Check this to enable the powerups overlay for spectators.";
         case "bEnableEnhancedNetcode": return "Check this to enable the enhanced netcode.";
         case "bEnableVoting": return "Check this to enable voting.";
         case "bEnableBrightSkinsVoting": return "Check this to enable voting for brightskins.";
         case "bEnablehitsoundsVoting": return "Check this to enable voting for hitsounds.";
         case "bEnableTeamOverlayVoting": return "Check this to enable voting for Team Overlay.";
+        case "bEnablePowerupsOverlayVoting": return "Check this to enable voting for powerups overlay for spectators.";
         case "bEnableEnhancedNetcodeVoting": return "Check this to enable voting for Enhanced Netcode.";
         case "bEnableWarmupVoting": return "Check this to enable voting for Warmup.";
         case "bEnableMapVoting": return "Check this to enable voting for Maps.";
@@ -1191,6 +1402,7 @@ defaultproperties
      bEnableHitsoundsVoting=True
      bEnableWarmupVoting=True
      bEnableTeamOverlayVoting=True
+     bEnablePowerupsOverlayVoting=True
      bEnableMapVoting=True
      bEnableGametypeVoting=True
      VotingPercentRequired=51.000000
@@ -1198,7 +1410,7 @@ defaultproperties
      benableDoubleDamage=True
      EnableBrightSkinsMode=3
      bEnableClanSkins=True
-     bEnableTeamOverlay=True
+     bEnablePowerupsOverlay=True
      EnableHitSoundsMode=1
      bEnableScoreboard=True
      bEnableWarmup=True

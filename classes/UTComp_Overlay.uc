@@ -39,7 +39,7 @@ class UTComp_Overlay extends Interaction;
 var gamereplicationinfo GRI;
 var font InfoFont, LocationFont;
 var float healthOffset, armorOffset, wepiconoffset;
-var int oldscreenwidth, oldfontsize;
+var int oldscreenwidth, oldScreenHeight, oldfontsize;
 var float currentX, currentY, strlenX, strlenY, strLenLocationX, strLenLocationY, strlenX3, strlenY3, iconscale;
 var float OnJoinMessageDrawTime;
 var config float DesiredOnJoinMessageTime;
@@ -55,13 +55,22 @@ var config float VertPosition, HorizPosition;
 var config Color BGColor, BGColorBlue, BGColorRed, InfoTextColor, LocTextColor;
 var config int theFontSize;
 
-var UTComp_ServerReplicationInfo RepInfo;
 var LevelInfo Level;
 
 var float PowerupIconOffset;
 var float PowerupCountdownOffset;
 
 var config bool bAlwaysShowPowerups;
+var BS_xPlayer PC;
+var UTComp_PRI uPRI;
+var PlayerReplicationInfo PRI;
+var int numPlayersRed;
+var int numPlayersBlue;
+var int numPowerups;
+
+var Texture MouseCursorTexture;
+var float MousePosX, MousePosY;
+
 
 event NotifyLevelChange()
 {
@@ -73,7 +82,12 @@ event Initialized()
     foreach ViewportOwner.Actor.DynamicActors(class'GameReplicationInfo', GRI)
         If (GRI != None)
             Break;
+
     Level = ViewPortOwner.Actor.Level;
+    PC = BS_xPlayer(ViewportOwner.Actor);
+    uPRI = PC.UTCompPRI;
+    PRI = PC.PlayerReplicationInfo;
+
     OnJoinMessageDrawTime=Level.TimeSeconds+default.DesiredOnJoinMessageTime;
 }
 
@@ -99,7 +113,78 @@ function float GetBoxWidth()
 
 function float GetBoxHeight(int numPlayers)
 {
-  return numPlayers * (strLenY+strLenLocationY);
+  local float height;
+  height = numPlayers * (strLenY+strLenLocationY);
+
+  if (default.bDrawIcons)
+    height += GetHeaderIconHeight();
+
+    return height;
+}
+
+/*  If we click on a player or powerup, spectates that player/powerup */
+function Click()
+{
+  local float boxPositionX, boxPositionY, boxWidth, boxHeight;
+  local float playerIndex;
+
+  boxPositionX = GetRedBoxPositionX();
+  boxPositionY = GetRedBoxPositionY();
+  boxWidth = GetBoxWidth();
+  boxHeight = GetBoxHeight(numPlayersRed);
+
+  
+
+  if (boxPositionX <= MousePosX && MousePosX <= (boxPositionX+boxWidth) && boxPositionY <= MousePosY && MousePosY <= (boxPositionY+boxHeight))
+  {
+    if (bDrawIcons)
+      playerIndex = Int((MousePosY - boxPositionY - GetHeaderIconHeight()) /  (strLenY + strLenLocationY));
+    else
+      playerIndex = Int((MousePosY - boxPositionY) /  (strLenY + strLenLocationY));
+
+    if (playerIndex >= 0 && playerIndex < 8 && uPRI.OverlayInfoRed[playerIndex].PRI != None)
+    {
+      PC.ServerGoToTarget(uPRI.OverlayInfoRed[playerIndex].PRI);
+      return;
+    }
+  }
+
+  boxPositionX = GetBlueBoxPositionX();
+  boxPositionY = GetBlueBoxPositionY();
+  boxWidth = GetBoxWidth();
+  boxHeight = GetBoxHeight(numPlayersBlue);
+
+  if (boxPositionX <= MousePosX && MousePosX <= (boxPositionX+boxWidth) && boxPositionY <= MousePosY && MousePosY <= (boxPositionY+boxHeight))
+  {
+    if (bDrawIcons)
+      playerIndex = Int((MousePosY - boxPositionY - GetHeaderIconHeight()) /  (strLenY + strLenLocationY));
+    else
+      playerIndex = Int((MousePosY - boxPositionY) /  (strLenY + strLenLocationY));
+
+    if (playerIndex >= 0 && playerIndex < 8 && uPRI.OverlayInfoBlue[playerIndex].PRI != None)
+    {
+      PC.ServerGoToTarget(uPRI.OverlayInfoBlue[playerIndex].PRI);
+      return;
+    }
+  }
+
+  // boxPositionX = GetPowerupBoxPositionX();
+  // boxPositionY = GetPowerupBoxPositionY();
+  // boxWidth = GetPowerupBoxWidth();
+  // boxHeight = GetPowerupBoxHeight();
+
+  // if (boxPositionX <= MousePosX && MousePosX <= (boxPositionX+boxWidth) && boxPositionY <= MousePosY && MousePosY <= (boxPositionY+boxHeight))
+  // {
+  //   playerIndex = Int((MousePosY - boxPositionY) /  (strLenY + strLenLocationY));
+
+  //   if (playerIndex >= 0 && playerIndex < 8 && uPRI.PowerupInfo[playerIndex].Pickup != None)
+  //   {
+  //     PC.ServerGoToTarget(uPRI.PowerupInfo[playerIndex].Pickup);
+  //     return;
+  //   }
+  // }
+
+
 }
 
 function DrawBackground(Canvas canvas, int numPlayers, int team)
@@ -117,16 +202,12 @@ function DrawBackground(Canvas canvas, int numPlayers, int team)
   boxSizeX = GetBoxWidth();
   boxSizeY = GetBoxHeight(numPlayers);
 
-  if (default.bDrawIcons)
-  {
-    iconHeight = GetHeaderIconHeight();
-    boxSizeY += iconHeight;
-  }
-
   Canvas.DrawTileStretched(material'Engine.WhiteTexture', boxSizeX, boxSizeY);
 
   if (default.bDrawIcons)
   {
+    iconHeight = GetHeaderIconHeight();
+
     Canvas.SetDrawColor(255, 255, 255, 255);
 
     // Health Icon
@@ -159,7 +240,7 @@ function DrawWelcomeBanner(Canvas canvas)
   Canvas.SetPos(currentX, currentY+1*(StrLenY3+2.0));
   Canvas.DrawText("UTComp "$MakeColorCode(class'Hud'.Default.GoldColor)$"CTF 0.1 alpha"$MakeColorCode(InfoTextColor)$".");
   Canvas.SetPos(currentX, currentY+3*(StrLenY3+2.0));
-  Canvas.DrawText("Press "$MakeColorCode(class'Hud'.Default.GoldColor)$class'GameInfo'.Static.GetKeyBindName("mymenu", BS_xPlayer(ViewportOwner.Actor))$MakeColorCode(InfoTextColor)$" to change");
+  Canvas.DrawText("Press "$MakeColorCode(class'Hud'.Default.GoldColor)$class'GameInfo'.Static.GetKeyBindName("mymenu", PC)$MakeColorCode(InfoTextColor)$" to change");
   Canvas.SetPos(currentX, currentY+4*(StrLenY3+2.0));
   Canvas.DrawText("your settings");
   if(GetNewNetEnabled())
@@ -169,28 +250,47 @@ function DrawWelcomeBanner(Canvas canvas)
   }
 }
 
+function float GetRedBoxPositionX()
+{
+  return OldScreenWidth*default.HorizPosition;//0.003;
+}
+
+function float GetRedBoxPositionY()
+{
+  return OldScreenHeight*default.VertPosition;//0.07;
+}
+
+function float GetBlueBoxPositionX()
+{
+  return OldScreenWidth - OldScreenWidth*default.HorizPosition - GetBoxWidth();//0.003;
+}
+
+function float GetBlueBoxPositionY()
+{
+  return OldScreenHeight*default.VertPosition;//0.07;
+}
+    
 function PostRender( canvas Canvas )
 {
    local int i, numplayers;
-   local UTComp_PRI uPRI;
-   local PlayerReplicationInfo PRI;
-
-   if (ViewportOwner.Actor.IsA('BS_xPlayer'))
+   
+   if (uPRI == None)
    {
-      uPRI = BS_xPlayer(ViewportOwner.Actor).UTCompPRI;
-      PRI = BS_xPlayer(ViewportOwner.Actor).PlayerReplicationInfo;
-      RepInfo = BS_xPlayer(ViewportOwner.Actor).RepInfo;
+    // Tried to put that in event Initialized, but it didn't work. Maybe the replicationinfo are not created yet?
+    uPRI = PC.UTCompPRI;
+    PRI = PC.PlayerReplicationInfo;
    }
 
    if (uPRI==None || ViewportOwner.Actor.myHUD.bShowScoreBoard || ViewportOwner.Actor.myHUD.bShowLocalStats || !default.OverlayEnabled)
        return;
 
   // iconScale=Canvas.ClipX/1280.0;
-   if((Canvas.SizeX != OldScreenWidth) || infoFont==None || locationFont==None || oldFontSize != default.theFontSize)
+   if((Canvas.SizeX != OldScreenWidth) || (Canvas.SizeY != OldScreenHeight) || infoFont==None || locationFont==None || oldFontSize != default.theFontSize)
    {
        GetFonts(Canvas);
        oldFontSize=default.TheFontSize;
        OldScreenWidth=Canvas.SizeX;
+       OldScreenHeight=Canvas.SizeY;
        Canvas.Font=infoFont;
        Canvas.StrLen("X", strlenx, strleny);
        Canvas.Font=LocationFont;
@@ -219,8 +319,8 @@ function PostRender( canvas Canvas )
        }
    }
 
-  currentX=Canvas.ClipX*default.HorizPosition;//0.003;
-  currentY=Canvas.ClipY*default.VertPosition;//0.07;
+  currentX = GetRedBoxPositionX();
+  currentY = GetRedBoxPositionY();
 
    if(ViewPortOwner.Actor.Level.TimeSeconds<OnJoinMessageDrawTime)
    {
@@ -236,6 +336,8 @@ function PostRender( canvas Canvas )
         numPlayers++;
     }
 
+    numPlayersRed = numPlayers;
+
     if (numPlayers > 0)
     {
       DrawBackground(Canvas, numPlayers, 0);
@@ -247,8 +349,8 @@ function PostRender( canvas Canvas )
     }
 
     //Switch to the other side in case we have to draw the blue team, in spec mode.
-    currentX = Canvas.ClipX - Canvas.ClipX*default.HorizPosition - GetBoxWidth();//0.003;
-    currentY = Canvas.ClipY*default.VertPosition;//0.07;
+    currentX = GetBlueBoxPositionX();
+    currentY = GetBlueBoxPositionY();
   }  
 
   if ((PRI.Team != None && PRI.Team.TeamIndex == 1) || (PRI.bOnlySpectator && (uPRI.CoachTeam == 255 || uPRI.CoachTeam == 1)))
@@ -261,6 +363,7 @@ function PostRender( canvas Canvas )
         numPlayers++;
     }
 
+    numPlayersBlue = numPlayers;
     if (numPlayers > 0)
     {
       DrawBackground(Canvas, numPlayers, 1);
@@ -273,27 +376,30 @@ function PostRender( canvas Canvas )
   } 
 
   DrawPowerups(Canvas, PRI);
+
+  PC.LastHUDSizeX = Canvas.SizeX;
+  PC.LastHUDSizeY = Canvas.SizeY;
+
+  if (PC.IsInState('PlayerMousing'))
+     DrawMouseCursor(Canvas);
 }
 
-function float GetPowerupBoxWidth()
-{
-  return PowerupCountdownOffset + 5*strLenX;
-}
-
-function string GetFriendlyPowerupName(class<Pickup> type, int team)
+function string GetFriendlyPowerupName(Pickup pickup, int team)
 {
   local string friendlyName;
   if (team == 0)
     friendlyName = "RED ";
   else if (team == 1)
     friendlyName = "BLUE ";
+  else
+    friendlyName = "MID ";
 
 //if (bickupBase.PowerUp == class'XPickups.SuperShieldPack' || bickupBase.PowerUp == class'XPickups.SuperHealthPack' || bickupBase.PowerUp == class'XPickups.UDamagePack')
-  if (type == class'XPickups.UDamagePack')
+  if (pickup.IsA('UDamagePack'))
     friendlyName = friendlyName$"Amp";
-  else if (type == class'XPickups.SuperHealthPack')
+  else if (pickup.IsA('SuperHealthPack'))
     friendlyName = friendlyName$"Keg";
-  else if (type == class'XPickups.SuperShieldPack')
+  else if (pickup.IsA('SuperShieldPack'))
     friendlyName = friendlyName$"100";
 
   return friendlyName;
@@ -330,72 +436,91 @@ simulated function String FormatTime( int Seconds )
     return Time;
 }
 
-function float GetPowerupHeight()
+function float GetPowerupIconHeight()
 {
   return 24.0*iconScale;
 }
 
-function float GetPowerupBoxHeight(int numPowerups)
+function float GetPowerupBoxWidth()
+{
+  return PowerupCountdownOffset + 9*strLenLocationX;
+}
+
+function float GetPowerupBoxHeight()
 {
   return numPowerups * (strLenY+strLenLocationY);
 }
 
+function float GetPowerupBoxPositionY()
+{
+  return OldScreenHeight * 0.45;//0.07;
+}
+
+
+function float GetPowerupBoxPositionX()
+{
+  return OldScreenWidth * default.HorizPosition;//0.003;
+}
+
 function DrawPowerups(Canvas canvas, PlayerReplicationInfo PRI)
 {
-  local int i;
-  local float nextRespawn;
-  local int numPowerups;
-  local float iconHeight;
+  // local int i;
+  // local float nextRespawn;
+  // local float iconHeight;
 
-  iconHeight = GetPowerupHeight();
+  // iconHeight = GetPowerupIconHeight();
 
-  for (i = 0; i < 8; i++)
-  {
-    if (RepInfo.PowerupInfo[i].PickupBase == None)
-      break;
-    numPowerups++;
-  }
+  // numPowerups = 0;
+  // for (i = 0; i < 8; i++)
+  // {
+  //   if (uPRI.PowerupInfo[i].Pickup == None)
+  //     break;
+  //   numPowerups++;
+  // }
 
-  Canvas.DrawColor = BGColor;
-  currentX = Canvas.ClipX * default.HorizPosition;//0.003;
-  currentY = Canvas.ClipY * 0.45;//0.07;
-  Canvas.SetPos(currentX, currentY);
-  Canvas.DrawTileStretched(material'Engine.WhiteTexture', GetBoxWidth(), GetPowerupBoxHeight(numPowerups));
+  // Canvas.DrawColor = BGColor;
+  // currentX = GetPowerupBoxPositionX();
+  // currentY = GetPowerupBoxPositionY();
 
-  Canvas.DrawColor = default.InfoTextColor;
+  // Canvas.SetPos(currentX, currentY);
+  // Canvas.DrawTileStretched(material'Engine.WhiteTexture', GetPowerupBoxWidth(), GetPowerupBoxHeight());
 
-  for (i = 0; i < 8; i++)
-  {
-    if (RepInfo.PowerupInfo[i].PickupBase == None)
-      break;
+  // Canvas.DrawColor = default.InfoTextColor;
 
-    nextRespawn = RepInfo.PowerupInfo[i].NextRespawnTime - Level.TimeSeconds;
+  // for (i = 0; i < 8; i++)
+  // {
+  //   if (uPRI.PowerupInfo[i].Pickup == None)
+  //     break;
 
-    if (!bAlwaysShowPowerups && nextRespawn > 10)
-      break;
+  //   nextRespawn = uPRI.PowerupInfo[i].NextRespawnTime - Level.GRI.ElapsedTime;
 
-    Canvas.Font = LocationFont;
+  //   if (!bAlwaysShowPowerups && nextRespawn > 10)
+  //     break;
 
-    // Icon
-    Canvas.SetPos(currentX + PowerupIconOffset, currentY);
-    if (RepInfo.PowerupInfo[i].PickupBase.Powerup == class'XPickups.UDamagePack')
-      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,0,164,73,82);
-    else if (RepInfo.PowerupInfo[i].PickupBase.Powerup == class'XPickups.SuperShieldPack')
-      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,1,248,66,66);
-    else if (RepInfo.PowerupInfo[i].PickupBase.Powerup == class'XPickups.SuperHealthPack')
-      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,75,167,48,48);
+  //   Canvas.Font = LocationFont;
 
-    // Name + location
-    Canvas.SetPos(currentX + PowerupCountdownOffset, currentY+strLenLocationY);
-    Canvas.DrawText(GetFriendlyPowerupName(RepInfo.PowerupInfo[i].PickupBase.Powerup, RepInfo.PowerupInfo[i].Team));
+  //   // Icon
+  //   Canvas.SetPos(currentX + PowerupIconOffset, currentY);
+  //   if (uPRI.PowerupInfo[i].Pickup.IsA('UDamagePack'))
+  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,0,164,73,82);
+  //   else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
+  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,1,248,66,66);
+  //   else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperHealthPack'))
+  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,75,167,48,48);
 
-    // Countdown
-    Canvas.Font = InfoFont;
-    Canvas.SetPos(currentX + PowerupCountdownOffset, currentY);
-    Canvas.DrawText(FormatTime(nextRespawn));
+  //   // Name + location
+  //   Canvas.SetPos(currentX + PowerupCountdownOffset, currentY+strLenLocationY);
+  //   Canvas.DrawText(GetFriendlyPowerupName(uPRI.PowerupInfo[i].Pickup, uPRI.PowerupInfo[i].Team));
 
-    currentY += strLenLocationY + strLenY;
-  }
+  //   // Countdown
+  //   Canvas.Font = InfoFont;
+  //   Canvas.SetPos(currentX + PowerupCountdownOffset, currentY);
+  //   Canvas.DrawText(FormatTime(nextRespawn));
+
+  //   if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
+  //     Log("nextRespawn"@nextRespawn);
+  //   currentY += strLenLocationY + strLenY;
+  // }
 }
 
 
@@ -452,6 +577,8 @@ function DrawPlayerNames(Canvas Canvas, UTComp_PRI uPRI, int team)
   oldClipX = Canvas.ClipX;
   Canvas.ClipX = currentX + Healthoffset;
 
+  Canvas.Font = infoFont;
+
   for (i = 0; i < 8; i++)
   {
     GetPlayerNameInfo(uPRI, i, team, PRI, hasFlag, hasDD);
@@ -469,7 +596,7 @@ function DrawPlayerNames(Canvas Canvas, UTComp_PRI uPRI, int team)
     Canvas.StrLen(PRI.PlayerName, lenX, lenY);
     
     // Name too big!
-    if (lenX > HealthOffset - currentX)
+    if (lenX > HealthOffset)
       Canvas.Font = LocationFont;
     else
       Canvas.Font = InfoFont;
@@ -552,7 +679,7 @@ function DrawArmor(Canvas Canvas, UTComp_PRI uPRI, int team)
   }
 }
 
-function texture GetWeaponIcon(byte weapon)
+function Texture GetWeaponIcon(byte weapon)
 {
   switch(weapon)
   {
@@ -792,6 +919,43 @@ function string GetDebugLoc(vector tempLoc)
   return "";
 }
 
+
+function DrawMouseCursor(Canvas C)
+{
+   C.SetDrawColor(255, 255, 255);
+   C.Style = 5;
+
+   // find position of cursor, and clamp it to screen
+   MousePosX = PC.PlayerMouse.X + C.SizeX / 2.0;
+   if (MousePosX < 0)
+   {
+      PC.PlayerMouse.X -= MousePosX;
+      MousePosX = 0;
+   }
+   else if (MousePosX >= C.SizeX)
+   {
+      PC.PlayerMouse.X -= (MousePosX - C.SizeX);
+      MousePosX = C.SizeX - 1;
+   }
+   MousePosY = PC.PlayerMouse.Y + C.SizeY / 2.0;
+   if (MousePosY < 0)
+   {
+      PC.PlayerMouse.Y -= MousePosY;
+      MousePosY = 0;
+   }
+   else if (MousePosY >= C.SizeY)
+   {
+      PC.PlayerMouse.Y -= (MousePosY - C.SizeY);
+      MousePosY = C.SizeY - 1;
+   }
+
+   // render mouse cursor
+   C.SetPos(MousePosX, MousePosY);
+   C.DrawIcon(MouseCursorTexture, 1.0);
+
+   return;
+}
+
 defaultproperties
 {
      DesiredOnJoinMessageTime=6.000000
@@ -804,6 +968,7 @@ defaultproperties
      BGColorBlue=(B=50,G=0,R=0,A=155)
      InfoTextColor=(B=255,G=255,R=255,A=255)
      LocTextColor=(B=155,G=155,R=155,A=255)
+     MouseCursorTexture=Texture'2K4Menus.Cursors.Pointer'
      theFontSize=-5
      bVisible=True
      bAlwaysShowPowerups=True

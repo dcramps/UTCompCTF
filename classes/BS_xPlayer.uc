@@ -95,6 +95,12 @@ var bool bDisableSpeed, bDisableBooster, bDisableInvis, bDisableberserk;
 
 var bool bSpecingViewGoal;
 
+var vector PlayerMouse;
+var float LastHUDSizeX;
+var float LastHUDSizeY;
+var UTComp_OVerlay Overlay;
+
+
 var UTComp_PRI currentStatDraw;
 
 replication
@@ -107,7 +113,7 @@ replication
         SetbStats, TurnOffNetCode, ServerTopStats;
     unreliable if(Role<Role_Authority)
         ServerNextPlayer, ServerGoToPlayer, ServerFindNextNode,
-        serverfindprevnode, servergotonode, ServerGoToWepBase, speclockRed, speclockBlue, CallVote;
+        serverfindprevnode, servergotonode, ServerGoToWepBase, speclockRed, speclockBlue, ServerGoToTarget, CallVote;
     reliable if(Role<Role_Authority)
         ServerAdminReady, BroadCastVote, BroadCastReady;
 
@@ -1072,9 +1078,10 @@ function ServerSpecViewGoal()
         {
             if(Pawn(NewGoal)!=None && ((Pawn(NewGoal).GetTeamNum() == 1 && IsCoachingBlue()) || (Pawn(NewGoal).GetTeamNum() == 0 && IsCoachingRed())))
             {
+              //bBehindView = true; //bChaseCam;
               SetViewTarget(NewGoal);
     	        ClientSetViewTarget(NewGoal);
-	            bBehindView = true; //bChaseCam;
+	            
             }
         }
     }
@@ -1188,6 +1195,14 @@ exec function GoToPlayer(int k)
    if(IsCoaching())
        return ;
    ServerGoToPlayer(k-1);
+}
+
+function ServerGoToTarget(Actor a)
+{
+  if (a.IsA('PlayerReplicationInfo'))
+    ServerSetViewTarget(a.Owner);
+  else
+    ServerSetViewTarget(a);
 }
 
 function bool ServerNextPlayer(int teamindex)
@@ -1593,6 +1608,13 @@ function ServerToggleBehindView()
 
 state spectating
 {
+    event PlayerTick( float DeltaTime )
+    {
+      Super.PlayerTick(DeltaTime);
+      if (bRun == 1)
+        GoToState('PlayerMousing');
+    }
+
     function BeginState()
     {
         Super.BeginState();
@@ -2745,70 +2767,6 @@ function bool ComboDisabled(class<Combo> ComboClass)
     return false;
 }
 
-
-
-defaultproperties
-{
-
-     UTCompMenuClass="UTCompCTFv01.UTComp_Menu_OpenedMenu"
-     UTCompVotingMenuClass="UTCompCTFv01.UTComp_Menu_VoteInProgress"
-     redmessagecolor=(B=64,G=64,R=255,A=255)
-     greenmessagecolor=(B=128,G=255,R=128,A=255)
-     bluemessagecolor=(B=255,G=192,R=64,A=255)
-     yellowmessagecolor=(G=255,R=255,A=255)
-     graymessagecolor=(B=155,G=155,R=255)
-
-     WepStatNames(0)="Combo"
-     WepStatNames(1)="I-Gib"
-     WepStatNames(2)="AVRIL"
-     WepStatNames(3)="Grenades"
-     WepStatNames(4)="Spider"
-     WepStatNames(5)="Sniper"
-     WepStatNames(6)="Rockets"
-     WepStatNames(7)="Flak"
-     WepStatNames(8)="Mini"
-     WepStatNames(9)="Link"
-     WepStatNames(10)="Shock"
-     WepStatNames(11)="Bio"
-     WepStatNames(12)="Assault"
-     WepStatNames(13)="Shield"
-     WepStatNames(14)="Crush"
-     WepStatDamTypesAlt(6)=Class'XWeapons.DamTypeRocketHoming'
-     WepStatDamTypesAlt(7)=Class'XWeapons.DamTypeFlakShell'
-     WepStatDamTypesAlt(8)=Class'XWeapons.DamTypeMinigunAlt'
-     WepStatDamTypesAlt(9)=Class'XWeapons.DamTypeLinkShaft'
-     WepStatDamTypesAlt(10)=Class'XWeapons.DamTypeShockBall'
-     WepStatDamTypesAlt(12)=Class'XWeapons.DamTypeAssaultGrenade'
-     WepStatDamTypesPrim(0)=Class'XWeapons.DamTypeShockCombo'
-     WepStatDamTypesPrim(1)=Class'XWeapons.DamTypeSuperShockBeam'
-     WepStatDamTypesPrim(2)=Class'Onslaught.DamTypeONSAVRiLRocket'
-     WepStatDamTypesPrim(3)=Class'Onslaught.DamTypeONSGrenade'
-     WepStatDamTypesPrim(4)=Class'Onslaught.DamTypeONSMine'
-     WepStatDamTypesPrim(5)=Class'XWeapons.DamTypeSniperShot'
-     WepStatDamTypesPrim(6)=Class'XWeapons.DamTypeRocket'
-     WepStatDamTypesPrim(7)=Class'XWeapons.DamTypeFlakChunk'
-     WepStatDamTypesPrim(8)=Class'XWeapons.DamTypeMinigunBullet'
-     WepStatDamTypesPrim(9)=Class'XWeapons.DamTypeLinkPlasma'
-     WepStatDamTypesPrim(10)=Class'XWeapons.DamTypeShockBeam'
-     WepStatDamTypesPrim(11)=Class'XWeapons.DamTypeBioGlob'
-     WepStatDamTypesPrim(12)=Class'XWeapons.DamTypeAssaultBullet'
-     WepStatDamTypesPrim(13)=Class'XWeapons.DamTypeShieldImpact'
-     WepStatDamTypesPrim(14)=Class'Engine.Crushed'
-     CustomWepTypes(0)=(WepName="Manta",damtype[0]="Onslaught.DamTypeHoverBikePancake",damtype[1]="Onslaught.DamTypeHoverBikeHeadshot",damtype[2]="Onslaught.DamTypeHoverBikePlasma")
-     CustomWepTypes(1)=(WepName="Raptor",damtype[0]="Onslaught.DamTypeAttackCraftPancake",damtype[1]="Onslaught.DamTypeAttackCraftRoadkill",damtype[2]="Onslaught.DamTypeAttackCraftMissle",damtype[3]="Onslaught.DamTypeAttackCraftPlasma")
-     CustomWepTypes(2)=(WepName="HBender",damtype[0]="Onslaught.DamTypePRVPancake",damtype[1]="Onslaught.DamTypePRVRoadkill",damtype[2]="Onslaught.DamTypePRVCombo",damtype[3]="Onslaught.DamTypePRVLaser",damtype[4]="Onslaught.DamTypeChargingBeam",damtype[5]="Onslaught.DamTypeSkyMine")
-     CustomWepTypes(3)=(WepName="Scorpion",damtype[0]="Onslaught.DamTypeRVPancake",damtype[1]="Onslaught.DamTypeRVRoadkill",damtype[2]="Onslaught.DamTypeONSRVBlade",damtype[3]="Onslaught.DamTypeONSWeb")
-     CustomWepTypes(4)=(WepName="Goliath",damtype[0]="Onslaught.DamTypeTankPancake",damtype[1]="Onslaught.DamTypeTankRoadkill",damtype[2]="Onslaught.DamTypeTankShell")
-     CustomWepTypes(5)=(WepName="Leviath",damtype[0]="OnslaughtFull.DamTypeMASCannon",damtype[1]="OnslaughtFull.DamTypeMASPlasma",damtype[2]="OnslaughtFull.DamTypeMASRoadKill",damtype[3]="OnslaughtFull.DamTypeMASPanCake")
-     CustomWepTypes(6)=(WepName="Fighter",damtype[0]="UT2k4AssaultFull.DamTypeSpaceFighterLaser",damtype[1]="UT2k4AssaultFull.DamTypeSpaceFighterLaser_Skaarj",damtype[2]="UT2k4AssaultFull.DamTypeSpaceFighterMissile",damtype[3]="UT2k4AssaultFull.DamTypeSpaceFighterMissileSkaarj")
-     CustomWepTypes(7)=(WepName="IonTank",damtype[0]="OnslaughtFull.DamTypeIonTankBlast",damtype[1]="UT2k4AssaultFull.DamTypeIonCannonBlast")
-     CustomWepTypes(8)=(WepName="SuperWep",damtype[0]="XWeapons.DamTypeRedeemer",DamType[1]="XWeapons.DamTypeIonBlast")
-     CustomWepTypes(9)=(WepName="Paladin",damtype[0]="OnslaughtBP.DamTypeShockTankProximityExplosion",DamType[1]="OnslaughtBP.DamTypeShockTankShockBall")
-     CustomWepTypes(10)=(WepName="Cicada",damtype[0]="OnslaughtBP.DamTypeONSCicadaRocket",DamType[1]="OnslaughtBP.DamTypeONSCicadaLaser")
-     CustomWepTypes(11)=(WepName="SPMA",damtype[0]="OnslaughtBP.DamTypeArtilleryShell")
-     CustomWepTypes(12)=(WepName="XxxX ESR",damtype[0]="XxxXESRInstaGib",damtype[1]="XxxXESRHeadshot")
-}
-
 //--------------------------
 //Additions for UTCompCTF
 //--------------------------
@@ -2819,4 +2777,107 @@ exec function Suicide()
   if ((Pawn != None) && (Level.TimeSeconds - Pawn.LastStartTime > class'UTCompCTFv01.MutUTComp'.Default.SuicideInterval)) {
     Pawn.Suicide();
   }
+}
+
+state PlayerMousing extends Spectating
+{
+
+  event PlayerTick( float DeltaTime )
+  {
+    Super.PlayerTick(DeltaTime);
+    if (bRun == 0)
+      GoToState('Spectating');
+  }
+
+  exec function Fire(float f)
+  {
+    // do stuff here for when players click their fire/select button
+    Overlay.Click();
+    return;
+  }
+
+  simulated function PlayerMove(float DeltaTime)
+  {
+    local vector MouseV, ScreenV;
+
+    // get the new mouse position offset
+    MouseV.X = DeltaTime * aMouseX / (InputClass.default.MouseSensitivity * DesiredFOV * 0.01111) * (class'GUIController'.default.MenuMouseSens * 2);
+    MouseV.Y = DeltaTime * aMouseY / (InputClass.default.MouseSensitivity * DesiredFOV * -0.01111) * (class'GUIController'.default.MenuMouseSens * 2);
+
+    // update mouse position
+    PlayerMouse += MouseV;
+
+    // convert mouse position to screen coords, but only if we have good screen sizes
+    if ((LastHUDSizeX > 0) && (LastHUDSizeY > 0))
+    {
+       ScreenV.X = PlayerMouse.X + LastHUDSizeX * 0.5;
+       ScreenV.Y = PlayerMouse.Y + LastHUDSizeY * 0.5;
+       // here is where you would use the screen coords to do a trace or check HUD elements
+    }
+
+    return;
+  }
+}
+
+
+defaultproperties
+{
+
+   UTCompMenuClass="UTCompCTFv01.UTComp_Menu_OpenedMenu"
+   UTCompVotingMenuClass="UTCompCTFv01.UTComp_Menu_VoteInProgress"
+   redmessagecolor=(B=64,G=64,R=255,A=255)
+   greenmessagecolor=(B=128,G=255,R=128,A=255)
+   bluemessagecolor=(B=255,G=192,R=64,A=255)
+   yellowmessagecolor=(G=255,R=255,A=255)
+   graymessagecolor=(B=155,G=155,R=255)
+
+   WepStatNames(0)="Combo"
+   WepStatNames(1)="I-Gib"
+   WepStatNames(2)="AVRIL"
+   WepStatNames(3)="Grenades"
+   WepStatNames(4)="Spider"
+   WepStatNames(5)="Sniper"
+   WepStatNames(6)="Rockets"
+   WepStatNames(7)="Flak"
+   WepStatNames(8)="Mini"
+   WepStatNames(9)="Link"
+   WepStatNames(10)="Shock"
+   WepStatNames(11)="Bio"
+   WepStatNames(12)="Assault"
+   WepStatNames(13)="Shield"
+   WepStatNames(14)="Crush"
+   WepStatDamTypesAlt(6)=Class'XWeapons.DamTypeRocketHoming'
+   WepStatDamTypesAlt(7)=Class'XWeapons.DamTypeFlakShell'
+   WepStatDamTypesAlt(8)=Class'XWeapons.DamTypeMinigunAlt'
+   WepStatDamTypesAlt(9)=Class'XWeapons.DamTypeLinkShaft'
+   WepStatDamTypesAlt(10)=Class'XWeapons.DamTypeShockBall'
+   WepStatDamTypesAlt(12)=Class'XWeapons.DamTypeAssaultGrenade'
+   WepStatDamTypesPrim(0)=Class'XWeapons.DamTypeShockCombo'
+   WepStatDamTypesPrim(1)=Class'XWeapons.DamTypeSuperShockBeam'
+   WepStatDamTypesPrim(2)=Class'Onslaught.DamTypeONSAVRiLRocket'
+   WepStatDamTypesPrim(3)=Class'Onslaught.DamTypeONSGrenade'
+   WepStatDamTypesPrim(4)=Class'Onslaught.DamTypeONSMine'
+   WepStatDamTypesPrim(5)=Class'XWeapons.DamTypeSniperShot'
+   WepStatDamTypesPrim(6)=Class'XWeapons.DamTypeRocket'
+   WepStatDamTypesPrim(7)=Class'XWeapons.DamTypeFlakChunk'
+   WepStatDamTypesPrim(8)=Class'XWeapons.DamTypeMinigunBullet'
+   WepStatDamTypesPrim(9)=Class'XWeapons.DamTypeLinkPlasma'
+   WepStatDamTypesPrim(10)=Class'XWeapons.DamTypeShockBeam'
+   WepStatDamTypesPrim(11)=Class'XWeapons.DamTypeBioGlob'
+   WepStatDamTypesPrim(12)=Class'XWeapons.DamTypeAssaultBullet'
+   WepStatDamTypesPrim(13)=Class'XWeapons.DamTypeShieldImpact'
+   WepStatDamTypesPrim(14)=Class'Engine.Crushed'
+   CustomWepTypes(0)=(WepName="Manta",damtype[0]="Onslaught.DamTypeHoverBikePancake",damtype[1]="Onslaught.DamTypeHoverBikeHeadshot",damtype[2]="Onslaught.DamTypeHoverBikePlasma")
+   CustomWepTypes(1)=(WepName="Raptor",damtype[0]="Onslaught.DamTypeAttackCraftPancake",damtype[1]="Onslaught.DamTypeAttackCraftRoadkill",damtype[2]="Onslaught.DamTypeAttackCraftMissle",damtype[3]="Onslaught.DamTypeAttackCraftPlasma")
+   CustomWepTypes(2)=(WepName="HBender",damtype[0]="Onslaught.DamTypePRVPancake",damtype[1]="Onslaught.DamTypePRVRoadkill",damtype[2]="Onslaught.DamTypePRVCombo",damtype[3]="Onslaught.DamTypePRVLaser",damtype[4]="Onslaught.DamTypeChargingBeam",damtype[5]="Onslaught.DamTypeSkyMine")
+   CustomWepTypes(3)=(WepName="Scorpion",damtype[0]="Onslaught.DamTypeRVPancake",damtype[1]="Onslaught.DamTypeRVRoadkill",damtype[2]="Onslaught.DamTypeONSRVBlade",damtype[3]="Onslaught.DamTypeONSWeb")
+   CustomWepTypes(4)=(WepName="Goliath",damtype[0]="Onslaught.DamTypeTankPancake",damtype[1]="Onslaught.DamTypeTankRoadkill",damtype[2]="Onslaught.DamTypeTankShell")
+   CustomWepTypes(5)=(WepName="Leviath",damtype[0]="OnslaughtFull.DamTypeMASCannon",damtype[1]="OnslaughtFull.DamTypeMASPlasma",damtype[2]="OnslaughtFull.DamTypeMASRoadKill",damtype[3]="OnslaughtFull.DamTypeMASPanCake")
+   CustomWepTypes(6)=(WepName="Fighter",damtype[0]="UT2k4AssaultFull.DamTypeSpaceFighterLaser",damtype[1]="UT2k4AssaultFull.DamTypeSpaceFighterLaser_Skaarj",damtype[2]="UT2k4AssaultFull.DamTypeSpaceFighterMissile",damtype[3]="UT2k4AssaultFull.DamTypeSpaceFighterMissileSkaarj")
+   CustomWepTypes(7)=(WepName="IonTank",damtype[0]="OnslaughtFull.DamTypeIonTankBlast",damtype[1]="UT2k4AssaultFull.DamTypeIonCannonBlast")
+   CustomWepTypes(8)=(WepName="SuperWep",damtype[0]="XWeapons.DamTypeRedeemer",DamType[1]="XWeapons.DamTypeIonBlast")
+   CustomWepTypes(9)=(WepName="Paladin",damtype[0]="OnslaughtBP.DamTypeShockTankProximityExplosion",DamType[1]="OnslaughtBP.DamTypeShockTankShockBall")
+   CustomWepTypes(10)=(WepName="Cicada",damtype[0]="OnslaughtBP.DamTypeONSCicadaRocket",DamType[1]="OnslaughtBP.DamTypeONSCicadaLaser")
+   CustomWepTypes(11)=(WepName="SPMA",damtype[0]="OnslaughtBP.DamTypeArtilleryShell")
+   CustomWepTypes(12)=(WepName="XxxX ESR",damtype[0]="XxxXESRInstaGib",damtype[1]="XxxXESRHeadshot")
 }

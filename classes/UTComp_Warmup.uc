@@ -472,6 +472,27 @@ function ResetStats()
        uPRI.ClearStats();
 }
 
+function Reset()
+{
+
+    local int i;
+    local float nextRespawnDelay;
+
+    // From Pickup, DelayedSpawn.
+    if (Level.NetMode == NM_Standalone)
+        nextRespawnDelay = FMin(30, Level.Game.GameDifficulty * 8);
+    else
+        nextRespawnDelay = 30;
+
+    for (i = 0; i < 8; i++)
+    {
+        MutUTComp(Owner).PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + nextRespawnDelay;
+        MutUTComp(Owner).PowerupInfo[i].LastTaker = None;
+    }
+
+    Super.Reset();
+}
+
 function ResetTheLevel()
 {
     local Controller C;

@@ -80,6 +80,17 @@ var TeamOverlayInfo OverlayInfoRed[iMAXPLAYERS];
 var TeamOverlayInfo OverlayInfoBlue[iMAXPLAYERS];
 
 
+// struct PowerupInfoStruct
+// {
+//     var Pickup Pickup;
+//     var int Team;
+//     var float NextRespawnTime;
+//     var PlayerReplicationInfo LastTaker;
+// };
+
+// var PowerupInfoStruct PowerupInfo[8];
+
+
 var bool bMapListCompleted;
 
 var localized string WepStatNames[15];
@@ -104,7 +115,7 @@ replication
         NormalWepStatsPrim, NormalWepStatsAlt;
 
     unreliable if(Role==Role_Authority && bNetOwner)
-        OverlayInfoRed, OverlayInfoBlue, VotedYes, VotedNo;
+        OverlayInfoRed, OverlayInfoBlue, VotedYes, VotedNo;//, PowerupInfo;
 
     reliable if(Role<Role_Authority)
         Ready, NotReady, SetVoteMode, SetCoachTeam,
@@ -113,11 +124,6 @@ replication
     reliable if(Role==Role_Authority && bNetOwner)
         MapListSend, SendTotalMapNumber;
 }
-
-
-
-
-
 
 simulated function UpdatePercentages()
 {

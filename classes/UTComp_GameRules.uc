@@ -65,7 +65,7 @@ function int NetDamage( int OriginalDamage, int Damage, pawn injured, pawn insti
 
 function LogPickup(Pawn other, Pickup item)
 {
-    UTCompMutator.RepInfo.LogPickup(other, item);
+    UTCompMutator.LogPickup(other, item);
 }
 
 function bool OverridePickupQuery(Pawn Other, Pickup item, out byte bAllowPickup)
@@ -167,10 +167,10 @@ function ScoreKill(Controller Killer, Controller Killed)
             if (xPawn(uPC.ViewTarget) != None && uPC.bSpecingViewGoal && (xPawn(uPC.ViewTarget).Controller == Killed || xPawn(uPC.ViewTarget).OldController == Killed)) 
             {
                 uPC.SetLocation(uPC.CalcViewLocation);
-                uPC.ClientSetLocation(uPC.CalcViewLocation, uPC.Rotation);
-
-                uPC.bBehindView = false;
                 uPC.SetViewTarget(uPC);
+
+                uPC.bBehindView = true;
+                uPC.ClientSetLocation(uPC.CalcViewLocation, uPC.CalcViewRotation);
                 uPC.ClientSetViewTarget(uPC); 
             }
         }
