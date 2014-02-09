@@ -44,7 +44,7 @@ var float currentX, currentY, strlenX, strlenY, strLenLocationX, strLenLocationY
 var float OnJoinMessageDrawTime;
 var config float DesiredOnJoinMessageTime;
 
-var config bool OverlayEnabled, bDrawIcons;
+var config bool OverlayEnabled, PowerupOverlayEnabled, bDrawIcons;
 var bool BiggerFont;
 
 var vector savedLocation[8];
@@ -168,21 +168,21 @@ function Click()
     }
   }
 
-  // boxPositionX = GetPowerupBoxPositionX();
-  // boxPositionY = GetPowerupBoxPositionY();
-  // boxWidth = GetPowerupBoxWidth();
-  // boxHeight = GetPowerupBoxHeight();
+  boxPositionX = GetPowerupBoxPositionX();
+  boxPositionY = GetPowerupBoxPositionY();
+  boxWidth = GetPowerupBoxWidth();
+  boxHeight = GetPowerupBoxHeight();
 
-  // if (boxPositionX <= MousePosX && MousePosX <= (boxPositionX+boxWidth) && boxPositionY <= MousePosY && MousePosY <= (boxPositionY+boxHeight))
-  // {
-  //   playerIndex = Int((MousePosY - boxPositionY) /  (strLenY + strLenLocationY));
+  if (boxPositionX <= MousePosX && MousePosX <= (boxPositionX+boxWidth) && boxPositionY <= MousePosY && MousePosY <= (boxPositionY+boxHeight))
+  {
+    playerIndex = Int((MousePosY - boxPositionY) /  (strLenY + strLenLocationY));
 
-  //   if (playerIndex >= 0 && playerIndex < 8 && uPRI.PowerupInfo[playerIndex].Pickup != None)
-  //   {
-  //     PC.ServerGoToTarget(uPRI.PowerupInfo[playerIndex].Pickup);
-  //     return;
-  //   }
-  // }
+    if (playerIndex >= 0 && playerIndex < 8 && uPRI.PowerupInfo[playerIndex].Pickup != None)
+    {
+      PC.ServerGoToTarget(uPRI.PowerupInfo[playerIndex].Pickup);
+      return;
+    }
+  }
 
 
 }
@@ -456,7 +456,6 @@ function float GetPowerupBoxPositionY()
   return OldScreenHeight * 0.45;//0.07;
 }
 
-
 function float GetPowerupBoxPositionX()
 {
   return OldScreenWidth * default.HorizPosition;//0.003;
@@ -464,63 +463,64 @@ function float GetPowerupBoxPositionX()
 
 function DrawPowerups(Canvas canvas, PlayerReplicationInfo PRI)
 {
-  // local int i;
-  // local float nextRespawn;
-  // local float iconHeight;
+  local int i;
+  local float nextRespawn;
+  local float iconHeight;
 
-  // iconHeight = GetPowerupIconHeight();
+  if (PC.uWarmup.bInWarmup || !PRI.bOnlySpectator || PC.IsCoaching() || !default.PowerupOverlayEnabled)
+    return;
 
-  // numPowerups = 0;
-  // for (i = 0; i < 8; i++)
-  // {
-  //   if (uPRI.PowerupInfo[i].Pickup == None)
-  //     break;
-  //   numPowerups++;
-  // }
+  iconHeight = GetPowerupIconHeight();
 
-  // Canvas.DrawColor = BGColor;
-  // currentX = GetPowerupBoxPositionX();
-  // currentY = GetPowerupBoxPositionY();
+  numPowerups = 0;
+  for (i = 0; i < 8; i++)
+  {
+    if (uPRI.PowerupInfo[i].Pickup == None)
+      break;
+    numPowerups++;
+  }
 
-  // Canvas.SetPos(currentX, currentY);
-  // Canvas.DrawTileStretched(material'Engine.WhiteTexture', GetPowerupBoxWidth(), GetPowerupBoxHeight());
+  Canvas.DrawColor = BGColor;
+  currentX = GetPowerupBoxPositionX();
+  currentY = GetPowerupBoxPositionY();
 
-  // Canvas.DrawColor = default.InfoTextColor;
+  Canvas.SetPos(currentX, currentY);
+  Canvas.DrawTileStretched(material'Engine.WhiteTexture', GetPowerupBoxWidth(), GetPowerupBoxHeight());
 
-  // for (i = 0; i < 8; i++)
-  // {
-  //   if (uPRI.PowerupInfo[i].Pickup == None)
-  //     break;
+  Canvas.DrawColor = default.InfoTextColor;
 
-  //   nextRespawn = uPRI.PowerupInfo[i].NextRespawnTime - Level.GRI.ElapsedTime;
+  for (i = 0; i < 8; i++)
+  {
+    if (uPRI.PowerupInfo[i].Pickup == None)
+      break;
 
-  //   if (!bAlwaysShowPowerups && nextRespawn > 10)
-  //     break;
+    nextRespawn = uPRI.PowerupInfo[i].NextRespawnTime - Level.GRI.ElapsedTime;
 
-  //   Canvas.Font = LocationFont;
+    if (!bAlwaysShowPowerups && nextRespawn > 10)
+      break;
 
-  //   // Icon
-  //   Canvas.SetPos(currentX + PowerupIconOffset, currentY);
-  //   if (uPRI.PowerupInfo[i].Pickup.IsA('UDamagePack'))
-  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,0,164,73,82);
-  //   else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
-  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,1,248,66,66);
-  //   else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperHealthPack'))
-  //     Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,75,167,48,48);
+    Canvas.Font = LocationFont;
 
-  //   // Name + location
-  //   Canvas.SetPos(currentX + PowerupCountdownOffset, currentY+strLenLocationY);
-  //   Canvas.DrawText(GetFriendlyPowerupName(uPRI.PowerupInfo[i].Pickup, uPRI.PowerupInfo[i].Team));
+    // Icon
+    Canvas.SetPos(currentX + PowerupIconOffset, currentY);
+    if (uPRI.PowerupInfo[i].Pickup.IsA('UDamagePack'))
+      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,0,164,73,82);
+    else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
+      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,1,248,66,66);
+    else if (uPRI.PowerupInfo[i].Pickup.IsA('SuperHealthPack'))
+      Canvas.DrawTile(material'HudContent.Generic.Hud',iconHeight,iconHeight,75,167,48,48);
 
-  //   // Countdown
-  //   Canvas.Font = InfoFont;
-  //   Canvas.SetPos(currentX + PowerupCountdownOffset, currentY);
-  //   Canvas.DrawText(FormatTime(nextRespawn));
+    // Name + location
+    Canvas.SetPos(currentX + PowerupCountdownOffset, currentY+strLenLocationY);
+    Canvas.DrawText(GetFriendlyPowerupName(uPRI.PowerupInfo[i].Pickup, uPRI.PowerupInfo[i].Team));
 
-  //   if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
-  //     Log("nextRespawn"@nextRespawn);
-  //   currentY += strLenLocationY + strLenY;
-  // }
+    // Countdown
+    Canvas.Font = InfoFont;
+    Canvas.SetPos(currentX + PowerupCountdownOffset, currentY);
+    Canvas.DrawText(FormatTime(nextRespawn));
+
+    currentY += strLenLocationY + strLenY;
+  }
 }
 
 
@@ -549,12 +549,12 @@ function GetPlayerNameInfo(UTComp_PRI uPRI, int index, int team, out PlayerRepli
   if (team == 0)
   {
     PRI = uPRI.OverlayInfoRed[index].PRI;
-    hasDD = uPRI.OverlayInfoRed[index].bHasDD;
+    hasDD = uPRI.bHasDDRed[index];
   }
   else
   {
     PRI = uPRI.OverlayInfoBlue[index].PRI;
-    hasDD = uPRI.OverlayInfoBlue[index].bHasDD;
+    hasDD = uPRI.bHasDDBlue[index];
   }
 
   if (PRI != None)
@@ -960,6 +960,7 @@ defaultproperties
 {
      DesiredOnJoinMessageTime=6.000000
      OverlayEnabled=True
+     PowerupOverlayEnabled=True
      bDrawIcons=True
      VertPosition=0.070000
      HorizPosition=0.003000

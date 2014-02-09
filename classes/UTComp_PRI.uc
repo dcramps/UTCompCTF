@@ -70,7 +70,6 @@ struct TeamOverlayInfo
 {
     var byte Armor;
     var byte Weapon;
-    var byte bHasDD;
     var int Health;
     var PlayerReplicationInfo PRI;
 };
@@ -80,15 +79,21 @@ var TeamOverlayInfo OverlayInfoRed[iMAXPLAYERS];
 var TeamOverlayInfo OverlayInfoBlue[iMAXPLAYERS];
 
 
-// struct PowerupInfoStruct
-// {
-//     var Pickup Pickup;
-//     var int Team;
-//     var float NextRespawnTime;
-//     var PlayerReplicationInfo LastTaker;
-// };
+// Don't be stupid and try to move those in the TeamOverlayInfo. It breaks the replication
+// Lost 3 hours to learn that lesson. I imagine lotus and co. learned that the hard way too, 
+// but didn't care enough to point it out. &?/*()%
+var byte bHasDDRed[iMAXPLAYERS];
+var byte bHasDDBlue[iMAXPLAYERS];
 
-// var PowerupInfoStruct PowerupInfo[8];
+struct PowerupInfoStruct
+{
+    var Pickup Pickup;
+    var int Team;
+    var float NextRespawnTime;
+    var PlayerReplicationInfo LastTaker;
+};
+
+var PowerupInfoStruct PowerupInfo[8];
 
 
 var bool bMapListCompleted;
@@ -115,7 +120,7 @@ replication
         NormalWepStatsPrim, NormalWepStatsAlt;
 
     unreliable if(Role==Role_Authority && bNetOwner)
-        OverlayInfoRed, OverlayInfoBlue, VotedYes, VotedNo;//, PowerupInfo;
+        OverlayInfoRed, OverlayInfoBlue, bHasDDRed, bHasDDBlue, VotedYes, VotedNo, PowerupInfo;
 
     reliable if(Role<Role_Authority)
         Ready, NotReady, SetVoteMode, SetCoachTeam,

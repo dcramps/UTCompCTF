@@ -198,7 +198,7 @@ function SetupPowerupInfo()
             PowerupInfo[i].PickupBase = pickupBase;
             
             if (pickupBase.myPickUp != None)
-                PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + pickupBase.myPickUp.GetRespawnTime();
+                PowerupInfo[i].NextRespawnTime = (pickupBase.myPickUp.GetRespawnTime() + pickupBase.myPickup.RespawnEffectTime)/Level.TimeDilation + Level.GRI.ElapsedTime;
 
             if (pickupBase.PowerUp == class'XPickups.SuperShieldPack')
                 shieldPickupCount++;
@@ -244,8 +244,7 @@ function LogPickup(Pawn other, Pickup item)
 
       if (PowerupInfo[i].PickupBase.myPickup == item)
       {
-          Log("Pickup taken:"@item);
-          PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + item.GetRespawnTime() - item.RespawnEffectTime;
+          PowerupInfo[i].NextRespawnTime = item.GetRespawnTime() - item.RespawnEffectTime + Level.GRI.ElapsedTime;
           PowerupInfo[i].LastTaker = other.PlayerReplicationInfo;
       }
     }
@@ -253,7 +252,6 @@ function LogPickup(Pawn other, Pickup item)
     if (i > 0)
     {
       SortPowerupInfo(0, i - 1); 
-      Log("Sort"@0@"to"@(i-1));
     }
 }
 
@@ -1274,7 +1272,7 @@ static function FillPlayInfo (PlayInfo PlayInfo)
     PlayInfo.AddSetting("UTComp Settings", "bEnableWarmupVoting", "Allow players to vote on Warmup setting.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableHitsoundsVoting", "Allow players to vote on Hitsounds settings.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlayVoting", "Allow players to vote on team overlay setting", 1, 1,"Check");
-    PlayInfo.AddSetting("UTComp Settings", "bEnableTeamOverlayVoting", "Allow players to vote on powerups overlay setting", 1, 1,"Check");
+    PlayInfo.AddSetting("UTComp Settings", "bEnablePowerupsOverlayVoting", "Allow players to vote on powerups overlay setting", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableEnhancedNetcodeVoting", "Allow players to vote on enhanced netcode setting", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "bEnableMapVoting", "Allow players to vote for map changes.", 1, 1,"Check");
     PlayInfo.AddSetting("UTComp Settings", "WarmupTime", "Warmup Time",1, 1, "Text","0;0:1800",,True,True);

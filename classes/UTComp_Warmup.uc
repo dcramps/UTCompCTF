@@ -486,7 +486,7 @@ function Reset()
 
     for (i = 0; i < 8; i++)
     {
-        MutUTComp(Owner).PowerupInfo[i].NextRespawnTime = Level.TimeSeconds + nextRespawnDelay;
+        MutUTComp(Owner).PowerupInfo[i].NextRespawnTime = nextRespawnDelay/Level.TimeDilation;
         MutUTComp(Owner).PowerupInfo[i].LastTaker = None;
     }
 

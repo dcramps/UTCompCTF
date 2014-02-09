@@ -1199,10 +1199,28 @@ exec function GoToPlayer(int k)
 
 function ServerGoToTarget(Actor a)
 {
+  local rotator rotation;
+
+   bSpecingViewGoal = false;
+
   if (a.IsA('PlayerReplicationInfo'))
     ServerSetViewTarget(a.Owner);
   else
+  {
+    bBehindView = true;
     ServerSetViewTarget(a);
+    ClientSetBehindview(true);
+    if (a.IsA('Pickup'))
+    {
+      rotation = Pickup(a).PickUpBase.rotation;
+      rotation.Yaw += 90*182.0444;
+      rotation.Pitch -= 15*182.0444;
+    }
+    else
+      rotation = CalcViewRotation;
+
+    ClientSetLocation(CalcViewLocation, rotation);
+  }
 }
 
 function bool ServerNextPlayer(int teamindex)
@@ -1617,7 +1635,16 @@ state spectating
 
     function BeginState()
     {
-        Super.BeginState();
+        if ( Pawn != None )
+        {
+            SetLocation(Pawn.Location);
+            UnPossess();
+        }
+        bCollideWorld = true;
+
+        // IT was annoying when we were switching to MouseLooking and Spectating state and had zoomed out. Dunno if it'll break something! haha. ha.
+        //CameraDist = Default.CameraDist;
+    
         SetTimer(1.0, True);
     }
     
@@ -2814,6 +2841,8 @@ state PlayerMousing extends Spectating
        ScreenV.Y = PlayerMouse.Y + LastHUDSizeY * 0.5;
        // here is where you would use the screen coords to do a trace or check HUD elements
     }
+
+    //Super.PlayerMove(deltaTime);
 
     return;
   }

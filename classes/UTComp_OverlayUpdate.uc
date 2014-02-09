@@ -30,20 +30,20 @@ function Timer()
 
 function ClearPowerupsVariables()
 {
-    // local UTComp_PRI uPRI;
-    // local int i;
+    local UTComp_PRI uPRI;
+    local int i;
 
-    // foreach DynamicActors(class'UTComp_PRI', uPRI)
-    // {
-    //     for(i=0; i<8; i++)
-    //     {
-    //         uPRI.PowerupInfo[i].Pickup = None;
-    //         uPRI.PowerupInfo[i].NextRespawnTime = 0;
-    //         uPRI.PowerupInfo[i].LastTaker = None;
-    //         uPRI.PowerupInfo[i].Team = 0;
-    //    }
-    // }
-    // bPowerupsVariableCleared = true;
+    foreach DynamicActors(class'UTComp_PRI', uPRI)
+    {
+        for(i=0; i<8; i++)
+        {
+            uPRI.PowerupInfo[i].Pickup = None;
+            uPRI.PowerupInfo[i].NextRespawnTime = 0;
+            uPRI.PowerupInfo[i].LastTaker = None;
+            uPRI.PowerupInfo[i].Team = 0;
+       }
+    }
+    bPowerupsVariableCleared = true;
 }
 
 function ClearTeamOverlayInfo()
@@ -58,13 +58,13 @@ function ClearTeamOverlayInfo()
             uPRI.OverlayInfoRed[i].Weapon=0;
             uPRI.OverlayInfoRed[i].Health=0;
             uPRI.OverlayInfoRed[i].Armor=0;
-            uPRI.OverlayInfoRed[i].bHasDD=0;
+            uPRI.bHasDDRed[i]=0;
 
             uPRI.OverlayInfoBlue[i].PRI=None;
             uPRI.OverlayInfoBlue[i].Weapon=0;
             uPRI.OverlayInfoBlue[i].Health=0;
             uPRI.OverlayInfoBlue[i].Armor=0;
-            uPRI.OverlayInfoBlue[i].bHasDD=0;
+            uPRI.bHasDDBlue[i]=0;
        }
     }
     bVariablesCleared=True;
@@ -83,42 +83,36 @@ function UpdateTeamOverlayInfo()
 */
 function UpdatePowerupsInfo()
 {
-  // local Controller c;
-  // local UTComp_PRI uPRI;
-  // local BS_xPlayer uC;
-  // local int i;
+  local Controller c;
+  local UTComp_PRI uPRI;
+  local BS_xPlayer uC;
+  local int i;
 
-  // for (c = Level.ControllerList; c != None; c = c.NextController)
-  // {
-  //   uPRI = class'UTComp_Util'.static.GetUTCompPRI(C.PlayerReplicationInfo);
-  //   uC = BS_xPlayer(c);
+  for (c = Level.ControllerList; c != None; c = c.NextController)
+  {
+    uPRI = class'UTComp_Util'.static.GetUTCompPRI(C.PlayerReplicationInfo);
+    uC = BS_xPlayer(c);
     
-  //   if (uPRI == None || uC == None)
-  //     continue;
+    if (uPRI == None || uC == None)
+      continue;
 
-  //   // Only send to spectators that are NOT coaching
-  //   if (!C.PlayerReplicationInfo.bOnlySpectator || uC.IsCoaching())
-  //     continue;
+    // Only send to spectators that are NOT coaching
+    if (!C.PlayerReplicationInfo.bOnlySpectator || uC.IsCoaching())
+      continue;
 
-  //   for (i = 0; i < 8; i++)
-  //   {
-  //     if (UTCompMutator.PowerupInfo[i].PickupBase == None)
-  //       break;
+    for (i = 0; i < 8; i++)
+    {
+      if (UTCompMutator.PowerupInfo[i].PickupBase == None)
+        break;
 
-  //     uPRI.PowerupInfo[i].Pickup = UTCompMutator.PowerupInfo[i].PickupBase.myPickup;
-  //     uPRI.PowerupInfo[i].Team = UTCompMutator.PowerupInfo[i].Team;
-  //     uPRI.PowerupInfo[i].NextRespawnTime = (UTCompMutator.PowerupInfo[i].NextRespawnTime - Level.TimeSeconds)/Level.TimeDilation + Level.GRI.ElapsedTime;
-  //     uPRI.PowerupInfo[i].LastTaker = UTCompMutator.PowerupInfo[i].LastTaker;
-  //     if (uPRI.PowerupInfo[i].Pickup.IsA('SuperShieldPack'))
-  //     {
-  //       Log("ElapseTime"@Level.GRI.ElapsedTime);
-  //       Log("Level.TimeSeconds"@Level.TimeSeconds);
-  //       Log(C.PlayerReplicationInfo.PlayerName@uPRI.PowerupInfo[i].NextRespawnTime);
-  //     }
-  //   }
-  // }
+      uPRI.PowerupInfo[i].Pickup = UTCompMutator.PowerupInfo[i].PickupBase.myPickup;
+      uPRI.PowerupInfo[i].Team = UTCompMutator.PowerupInfo[i].Team;
+      uPRI.PowerupInfo[i].NextRespawnTime = UTCompMutator.PowerupInfo[i].NextRespawnTime;
+      uPRI.PowerupInfo[i].LastTaker = UTCompMutator.PowerupInfo[i].LastTaker;
+    }
+  }
 
-  // bPowerupsVariableCleared = false;
+  bPowerupsVariableCleared = false;
 }
 
 function bool IsRelevant(UTComp_PRI uPRI, PlayerReplicationInfo PRI, PlayerReplicationInfo PRIOverlay)
@@ -176,7 +170,7 @@ function FindInfoForTeam(byte iTeam)
                    uPRI.OverlayInfoRed[k].Health = Health[i];
                    uPRI.OverlayInfoRed[k].Armor = Armor[i];
                    uPRI.OverlayInfoRed[k].PRI = PRI[i];
-                   uPRI.OverlayInfoRed[k].bHasDD = bHasDD[i];
+                   uPRI.bHasDDRed[k] = bHasDD[i];
                    k++;
                  }
                  else
@@ -185,7 +179,7 @@ function FindInfoForTeam(byte iTeam)
                    uPRI.OverlayInfoBlue[k].Health = Health[i];
                    uPRI.OverlayInfoBlue[k].Armor = Armor[i];
                    uPRI.OverlayInfoBlue[k].PRI = PRI[i];
-                   uPRI.OverlayInfoBlue[k].bHasDD = bHasDD[i];
+                   uPRI.bHasDDBlue[k] = bHasDD[i];
                    k++;
                  }
                }
