@@ -128,7 +128,7 @@ function ScoreFlag(Controller Scorer)
     Dist = vsize(FlagLoc - HomeBase.Location);
     oppDist = vsize(FlagLoc - xCTFGame(Level.Game).Teams[1 - TeamNum].HomeBase.Location);
 
-    CTFGame(Level.Game).GameEvent("flag_returned",""$TeamNum, Scorer.PlayerReplicationInfo);
+    CTFGame(Level.Game).GameEvent("flag_returned", ""$TeamNum, Scorer.PlayerReplicationInfo);
     BroadcastLocalizedMessage( class'CTFMessage', 1, Scorer.PlayerReplicationInfo, None, Team );
 
     if (Dist > 1024)
@@ -144,6 +144,7 @@ function ScoreFlag(Controller Scorer)
         if (oppDist <= 1000 && IsOtherFlagHome()) // Denial
         {
           Scorer.PlayerReplicationInfo.Score += 7;
+          uPRI.FlagSaves++;
           Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, 7, "flag_denial");
         }
         else

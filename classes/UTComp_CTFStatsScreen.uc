@@ -2,7 +2,7 @@ class UTComp_CTFStatsScreen extends DMStatsScreen;
 
 var UTComp_PRI uPRI;
 
-var localized string FlagCaps, FlagGrabs, FlagPickups, FlagKills, Assists, Covers, Seals, DefKills;
+var localized string FlagCaps, FlagGrabs, FlagPickups, FlagKills, FlagSaves, FlagDenials, Assists, Covers, Seals, DefKills;
 
 simulated event DrawScoreboard( Canvas C )
 {
@@ -129,6 +129,10 @@ simulated event DrawScoreboard( Canvas C )
 		GoalsNum++;
 	if (PRI.FlagReturns > 0)
 		GoalsNum++;
+	if (uPRI.FlagSaves > 0)
+		GoalsNum++;
+	if (uPRI.FlagDenials > 0)
+		GoalsNum++;
 
 	if (uPRI.Assists > 0)
 		GoalsNum++;
@@ -138,6 +142,8 @@ simulated event DrawScoreboard( Canvas C )
 		GoalsNum++;
 	if (uPRI.DefKills > 0)
 		GoalsNum++;
+
+	
 
 
 	if ( GoalsNum > 0 )
@@ -409,6 +415,38 @@ simulated event DrawScoreboard( Canvas C )
 			C.SetPos(4*IndentX+CombatBoxX+GoalsBoxColumn*(GoalsBoxColumnX+IndentX),OffsetY);
 		}
 
+		if ( uPRI.FlagDenials > 0 )
+		{
+			C.DrawText(FlagDenials);
+			C.StrLen(uPRI.FlagDenials, XL, LargeYL);
+			C.SetPos((GoalsBoxColumn+1)*IndentX+CombatBoxX+(GoalsBoxColumn+1)*GoalsBoxColumnX - XL,OffsetY);
+			C.DrawText(uPRI.FlagDenials);
+			OffsetY += LargeYL;
+			GoalsNum++;
+			if (GoalsNum == 5 && GoalsBoxColumn == 0)
+			{
+				GoalsBoxColumn = 1;
+				OffsetY = CombatOffsetY + 0.5*LargeYL;
+			}
+			C.SetPos(4*IndentX+CombatBoxX+GoalsBoxColumn*(GoalsBoxColumnX+IndentX),OffsetY);
+		}
+
+		if ( uPRI.FlagSaves > 0 )
+		{
+			C.DrawText(FlagSaves);
+			C.StrLen(uPRI.FlagSaves, XL, LargeYL);
+			C.SetPos((GoalsBoxColumn+1)*IndentX+CombatBoxX+(GoalsBoxColumn+1)*GoalsBoxColumnX - XL,OffsetY);
+			C.DrawText(uPRI.FlagSaves);
+			OffsetY += LargeYL;
+			GoalsNum++;
+			if (GoalsNum == 5 && GoalsBoxColumn == 0)
+			{
+				GoalsBoxColumn = 1;
+				OffsetY = CombatOffsetY + 0.5*LargeYL;
+			}
+			C.SetPos(4*IndentX+CombatBoxX+GoalsBoxColumn*(GoalsBoxColumnX+IndentX),OffsetY);
+		}
+
 		if ( uPRI.Assists > 0 )
 		{
 			C.DrawText(Assists);
@@ -606,6 +644,8 @@ DefaultProperties
 	FlagGrabs = "Flag Grabs"
 	FlagPickups = "Flag Pickups"
 	FlagKills = "Flag Kills"
+	FlagSaves = "Flag Saves"
+	FlagDenials = "Flag Denials"
 	Assists = "Assists"
 	Covers = "Covers"
 	Seals = "Seals"

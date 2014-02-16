@@ -55,6 +55,8 @@ var int FlagGrabs;
 var int FlagCaps;
 var int FlagPickups;
 var int FlagKills;
+var int FlagSaves; // Returned the flag at the last second
+var int FlagDenials; // Killed the EFC at the last second
 var int Assists;
 var int Covers;
 var int CoverSpree;
@@ -107,7 +109,7 @@ replication
     reliable if(Role==Role_Authority)
          bIsReady, CoachTeam, CurrentVoteID,
          ColoredName, RealKills,
-         FlagGrabs, FlagCaps, FlagPickups, FlagKills,
+         FlagGrabs, FlagCaps, FlagPickups, FlagKills, FlagSaves, FlagDenials,
          Assists, Covers, CoverSpree, Seals, SealSpree, DefKills;
 
     unreliable if(Role==Role_Authority && bNetOwner)

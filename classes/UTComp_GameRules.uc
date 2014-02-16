@@ -155,7 +155,22 @@ function ScoreKill(Controller Killer, Controller Killed)
               if(uPRI!=None)
                   uPRI.RealKills++;
           }
+
+
+        if (Level.Game.IsA('CTFGame') && Killed.PlayerReplicationInfo.HasFlag != None)
+        {
+            if ( (Killer!=None) && (Killer.PlayerReplicationInfo.Team != Killed.PlayerReplicationInfo.Team) )
+            {
+                if (CTFGame(Level.Game).NearGoal(Killed))
+                {
+                    uPRI=class'UTComp_Util'.static.GetUTCompPRI(Killer.PlayerReplicationInfo);
+                    if (uPRI!=None)
+                        uPRI.FlagDenials++;
+                }
+            }
+        }
       }
+
 
 
     // Next, if we are spectating a flag carrier through SpecViewGoal, we want to move to free cam at the location the FC died !

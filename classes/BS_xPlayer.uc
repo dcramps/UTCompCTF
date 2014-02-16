@@ -1825,6 +1825,8 @@ simulated function ResetUTCompStats()
         uPRI.FlagCaps = 0;
         uPRI.FlagPickups = 0;
         uPRI.FlagKills = 0;
+        uPRI.FlagSaves = 0;
+        uPRI.FlagDenials = 0;
         uPRI.Assists = 0;
         uPRI.Covers = 0;
         uPRI.CoverSpree = 0;
