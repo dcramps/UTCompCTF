@@ -81,83 +81,6 @@ function bool IsInZone(Controller c, int team)
 }
 
 /*
-  Since we want to overrde to scores from a flag, I copied this from CTFGame and negated the original scores.
-*/
-function ReverseStockScoreFlag(Controller Scorer)
-{
-  local float Dist,oppDist;
-  local int i;
-  local float ppp,numtouch;
-  local vector FlagLoc;
-
-  if (Scorer.PlayerReplicationInfo.Team == Team)
-  {
-    FlagLoc = Position().Location;
-    Dist = vsize(FlagLoc - HomeBase.Location);
-
-    oppDist = vsize(FlagLoc - xCTFGame(Level.Game).Teams[1 - TeamNum].HomeBase.Location);
-
-    if (Dist>1024)
-    {
-      // figure out who's closer
-      if (Dist<=oppDist)  // In your team's zone
-      {
-        Scorer.PlayerReplicationInfo.Score -= 3;
-        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo,-3,"reverse_flag_ret_friendly");
-      }
-      else
-      {
-        Scorer.PlayerReplicationInfo.Score -= 5;
-        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo,-5,"reverse_flag_ret_enemy");
-
-        if (oppDist<=1024)  // Denial
-        {
-          Scorer.PlayerReplicationInfo.Score -= 7;
-          Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo,-7,"reverse_flag_denial");
-        }
-
-      }
-    }
-    return;
-  }
-
-  // Figure out Team based scoring.
-  if (FirstTouch != None) // Original Player to Touch it gets 5
-  {
-    Level.Game.ScoreEvent(FirstTouch.PlayerReplicationInfo, -5, "reverse_flag_cap_1st_touch");
-    FirstTouch.PlayerReplicationInfo.Score -= 5;
-    FirstTouch.PlayerReplicationInfo.NetUpdateTime = Level.TimeSeconds - 1;
-  }
-
-  // Guy who caps gets 5
-  Scorer.PlayerReplicationInfo.NetUpdateTime = Level.TimeSeconds - 1;
-  Scorer.PlayerReplicationInfo.Score -= 5;
-
-  // Each player gets 20/x but it's guarenteed to be at least 1 point but no more than 5 points
-  numtouch=0;
-  for (i=0; i< Assists.length; i++)
-  {
-    if (Assists[i] != None)
-      numtouch = numtouch - 1.0;
-  }
-
-  ppp = FClamp(20/numtouch, 1, 5);
-
-  for (i = 0; i < Assists.length; i++)
-  {
-    if (Assists[i] != None)
-    {
-      Level.Game.ScoreEvent(Assists[i].PlayerReplicationInfo, ppp,"reverse_flag_cap_assist");
-      Assists[i].PlayerReplicationInfo.Score -= int(ppp);
-    }
-  }
-
-  Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo,-5,"reverse_flag_cap_final");
-
-}
-
-
-/*
  * Reset cover and seal sprees of Team cause of flag return.
  */
 function ResetSprees()
@@ -205,6 +128,9 @@ function ScoreFlag(Controller Scorer)
     Dist = vsize(FlagLoc - HomeBase.Location);
     oppDist = vsize(FlagLoc - xCTFGame(Level.Game).Teams[1 - TeamNum].HomeBase.Location);
 
+    CTFGame(Level.Game).GameEvent("flag_returned",""$TeamNum, Scorer.PlayerReplicationInfo);
+    BroadcastLocalizedMessage( class'CTFMessage', 1, Scorer.PlayerReplicationInfo, None, Team );
+
     if (Dist > 1024)
     {
       // figure out who's closer
@@ -246,9 +172,23 @@ function ScoreFlag(Controller Scorer)
     // Reset spress on both team.
     ResetSprees();
     ResetFlagCarriers();
+
+    // Apply the team score
+    Scorer.PlayerReplicationInfo.Team.Score += 1.0;
+    Scorer.PlayerReplicationInfo.Team.NetUpdateTime = Level.TimeSeconds - 1;
+
+    CTFGame(Level.Game).TeamScoreEvent(Scorer.PlayerReplicationInfo.Team.TeamIndex, 1, "flag_cap");
+    CTFGame(Level.Game).GameEvent("flag_captured",""$TeamNum,Scorer.PlayerReplicationInfo);
+
+    BroadcastLocalizedMessage(class'CTFMessage', 0, Scorer.PlayerReplicationInfo, None, Team);
+    CTFGame(Level.Game).AnnounceScore(Scorer.PlayerReplicationInfo.Team.TeamIndex);
+    CTFGame(Level.Game).CheckScore(Scorer.PlayerReplicationInfo);
+
+    if (CTFGame(Level.Game).bOverTime)
+    {
+      CTFGame(Level.Game).EndGame(Scorer.PlayerReplicationInfo, "timelimit");
+    }
   }
-  // Would need to copy super.ScoreFlag here to change how scoring works
-  // super.ScoreFlag(Scorer, theFlag);
 }
 
 /*
@@ -360,9 +300,9 @@ function RewardFlagCarriers()
 */
 function ResetFlagCarriers()
 {
-  //Log("ResetFlagCarriers");
   FlagCarriers.Remove(0, FlagCarriers.Length);
   PickupTime = 0;
+  //Log("PickupTime:"@PickupTime);
 }
 
 function LogDropped()
@@ -379,7 +319,10 @@ auto state Home
     {
       local UTComp_PRI uPRI;
 
+      ResetFlagCarriers();
+
       PickupTime = Level.TimeSeconds;
+      //Log("PickupTime:"@PickupTime);
 
       uPRI = class'UTComp_Util'.static.GetUTCompPRI(c.PlayerReplicationInfo);
       uPRI.FlagGrabs++;
@@ -391,10 +334,6 @@ auto state Home
 
     function SameTeamTouch(Controller c)
     {
-      local array<float> scores;
-      local int index;
-      local Controller loopC;
-      local PlayerReplicationInfo loopPRI;
       local UTComp_CTFFlag otherFlag;
 
       if (C.PlayerReplicationInfo.HasFlag == None || !C.PlayerReplicationInfo.HasFlag.isA('UTComp_CTFFlag'))
@@ -404,33 +343,16 @@ auto state Home
       otherFlag.OldHolder = otherFlag.Holder;
 
       // Capped the other flag! Doing so, we touched our own so this is where we are at.
-
-      // Back up the scores.
-      for (loopC = Level.ControllerList; loopC != None; loopC = loopC.NextController)
-      {
-        loopPRI = loopC.PlayerReplicationInfo;
-        if (loopPRI != None && loopPRI.Team != None && loopPRI.Team == c.PlayerReplicationInfo.Team)
-        {
-            scores[index++] = loopPRI.Score;
-        }
-      }
-
-      // Do the stock scoring
-      Super.SameTeamTouch(c);
-
-      // Reverse the scoring
-      index = 0;
-      for (loopC = Level.ControllerList; loopC != None; loopC = loopC.NextController)
-      {
-        loopPRI = loopC.PlayerReplicationInfo;
-        if (loopPRI != None && loopPRI.Team != None && loopPRI.Team == c.PlayerReplicationInfo.Team)
-        {
-            loopPRI.Score = scores[index++];
-        }
-      }
-
+	
+      // This next line calls CTFGame.ScoreFlag. We don't want that since we have
+      // our own points for scoring.
+      //UnrealMPGameInfo(Level.Game).ScoreGameObject(C, otherFlag);
       otherFlag.ScoreFlag(c);
-      //UTComp_CTFFlag(C.PlayerReplicationInfo.HasFlag).ReverseStockScoreFlag(c);
+      otherFlag.Score();
+      TriggerEvent(HomeBase.Event, HomeBase, C.Pawn);
+
+      if (Bot(C) != None)
+          Bot(C).Squad.SetAlternatePath(true);
     }
 }
 
@@ -439,10 +361,8 @@ state Dropped
     function SameTeamTouch(Controller c)
     {
       // returned flag
-      ReverseStockScoreFlag(c);
       ScoreFlag(c);
-      
-      Super.SameTeamTouch(c);
+      SendHome();
     }
     // Flag Pickup
     function LogTaken(Controller c)
@@ -452,6 +372,7 @@ state Dropped
         local int i;
 
         PickupTime = Level.TimeSeconds;
+        //Log("PickupTime:"@PickupTime);
 
         uPRI = class'UTComp_Util'.static.GetUTCompPRI(c.PlayerReplicationInfo);
 
