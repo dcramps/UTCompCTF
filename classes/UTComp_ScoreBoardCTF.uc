@@ -29,6 +29,17 @@ var int FONT_TEAM_PL;
 var int FONT_TEAM_POWERUP_PER;
 var int FONT_TEAM_SCORE;
 
+//Stats stuff fore scoreboard layout
+struct Stats
+{
+  var string name;
+  var float nameW;
+  var float nameH;
+  var string value;
+  var float valueW;
+  var float valueH;
+};
+
 //Materials for backgrounds
 var material TeamBoxMaterial;
 var material TeamHeaderMaterial;
@@ -111,9 +122,9 @@ simulated event UpdateScoreBoard(Canvas C)
   FONT_PLAYER_PING      = 1;
   FONT_PLAYER_PL        = 1;
   FONT_PLAYER_LOCATION  = 4;
-  FONT_PLAYER_STAT_NUM  = 4;
-  FONT_PLAYER_STAT      = 3;
-  FONT_PLAYER_SCORE     = 7;
+  FONT_PLAYER_STAT_NUM  = 3;
+  FONT_PLAYER_STAT      = 2;
+  FONT_PLAYER_SCORE     = 6;
   FONT_PLAYER_NAME      = 6;
   FONT_TEAM_PING_NUM    = 2;
   FONT_TEAM_PL_NUM      = 2;
@@ -180,11 +191,17 @@ simulated event UpdateScoreBoard(Canvas C)
   }
 
   screenScale = C.ClipX/1920; //1920 as a base..go down from there. 1024x768 --> 1024/1920 = 0.533 etc
+
+  //what the fuck?
+  // C.FontScaleX = C.ClipX / 1920;
+  // C.FontScaleY = C.ClipX / 1080;
   //DrawLogo(C, screenScale);
   //DrawMapTitle(C);
 
-  DrawTeamHeaders(C);
-  DrawCTFTeamInfoBoxes(C, RedPlayerCount, BluePlayerCount);
+  DrawTeamHeader(C,0);
+  DrawCTFTeamInfoBoxes(C, 0, RedPlayerCount);
+  DrawTeamHeader(C,1);
+  DrawCTFTeamInfoBoxes(C, 1, BluePlayerCount);
 
   C.SetDrawColor(255,255,255,255);
 
@@ -199,11 +216,11 @@ simulated event UpdateScoreBoard(Canvas C)
     {
       if(i==(maxTiles-1) && !bOwnerDrawn && OwnerPRI.Team != none && OwnerPRI.Team.TeamIndex==0 && !OwnerPRI.bOnlySpectator)
       {
-        DrawPlayerInformation(C,OwnerPRI,C.ClipX*(0.003),(C.ClipY*0.055)*i,screenScale);
+        DrawPlayerInformation(C, OwnerPRI, 95, 185 + 85*i, screenScale);
       }
       else
       {
-        DrawPlayerInformation(C,RedPRI[i],C.ClipX*(0.003),(C.ClipY*0.055)*i,screenScale);
+        DrawPlayerInformation(C, RedPRI[i], 95, 185 + 85*i, screenScale);
       }
 
       if (RedPRI[i]==OwnerPRI)
@@ -219,11 +236,11 @@ simulated event UpdateScoreBoard(Canvas C)
     {
       if(i==(maxTiles-1) && !bOwnerDrawn && OwnerPRI.Team != none && OwnerPRI.Team.TeamIndex==1 && !OwnerPRI.bOnlySpectator)
       {
-        DrawPlayerInformation(C,OwnerPRI,C.ClipX*0.496,(C.ClipY*0.055)*i,screenScale);
+        DrawPlayerInformation(C, OwnerPRI, 985, 185 + 85*i, screenScale);
       }
       else
       {
-        DrawPlayerInformation(C,BluePRI[i],C.ClipX*0.496,(C.ClipY*0.055)*i,screenScale);
+        DrawPlayerInformation(C, BluePRI[i], 985, 185 + 85*i, screenScale);
       }
 
       if (BluePRI[i]==OwnerPRI)
@@ -270,95 +287,172 @@ simulated function DrawLogo(Canvas C , float scale)
  * Draw team header
  */
 
-simulated function DrawTeamHeaders(Canvas C)
+simulated function DrawTeamHeader(Canvas C, byte team)
 {
-  local float redScoreWidth, redScoreHeight;
-  local float blueScoreWidth, blueScoreHeight;
-  local int baseHeight, baseWidth, baseY, redBaseX, blueBaseX;
+  local float scoreWidth, scoreHeight;
+  local float pingWidth, pingHeight;
+  local float plWidth, plHeight;
+  local float powerupPercentWidth, powerupPercentHeight;
+  local float powerupNumWidth, powerupNumHeight;
+  local float pingMaxWidth, pingMaxHeight;
+  local float scoreX, scoreY;
+  local float x_ping, x_pl;
+  local int baseHeight, baseWidth, baseY, baseX;
+  local int x;
+
+  switch (team)
+  {
+    case 0:
+      baseX = 95;
+      break;
+    case 1:
+      baseX = 985;
+      break;
+    default:
+  }
 
   baseHeight = 75;
   baseWidth  = 840;
   baseY      = 110;
-  redBaseX   = 95;  //95+840 width = 935, 960-935 = 25 (Gap to mid)
-  blueBaseX  = 985; //960 + 25 gap from mid
+  // redBaseX   = 95;  //95+840 width = 935, 960-935 = 25 (Gap to mid)
+  // blueBaseX  = 985; //960 + 25 gap from mid
 
   //Turn on alpha for transparent fuckery
   C.Style = ERenderStyle.STY_Alpha;
 
-  //Middle screen divider (debug...where is my #ifdef DEBUG?)
-  SetPosScaled(C, 959, 0);
-  C.SetDrawColor(255,0,0,255);
-  DrawTileStretchedScaled(C, TeamHeaderMaterial, 3, 1080);
-
-  //Main header Red
   C.SetDrawColor(0,0,0,90);
-  SetPosScaled(C, redBaseX, baseY);
-  DrawTileStretchedScaled(C, TeamHeaderMaterial, baseWidth, baseHeight);
 
-  //Main header blue
-  SetPosScaled(C, blueBaseX, baseY);
+  //Main header
+  SetPosScaled(C, baseX, baseY);
   DrawTileStretchedScaled(C, TeamHeaderMaterial, baseWidth, baseHeight);
 
   //Score
   C.SetDrawColor(255, 255, 255, 255);
   C.Style = ERenderStyle.STY_Normal;
   C.Font = GetFontWithSize(FONT_TEAM_SCORE); 
-  C.StrLen(int(GRI.Teams[0].Score), redScoreWidth, redScoreHeight);
-  C.StrLen(int(GRI.Teams[1].Score), blueScoreWidth, blueScoreHeight);
 
-  DrawTextJustifiedScaled(C, int(GRI.Teams[0].Score), 2, 960-35-redScoreWidth - 10, baseY, 885  + redScoreWidth,  baseY + 75);
-  DrawTextJustifiedScaled(C, int(GRI.Teams[1].Score), 0, blueBaseX + 10,            baseY, 1075 + blueScoreWidth, baseY + 75);
+  C.StrLen(int(GRI.Teams[team].Score), scoreWidth, scoreHeight);
+    
+  switch (team)
+  {
+    case 0:
+      scoreX = baseX + baseWidth - scoreWidth - 15;    
+      break;
+    case 1:
+      scoreX = baseX + 15;
+      break;
+    default:
+  }
+  
+  scoreY = baseY - scoreHeight + (baseHeight + scoreHeight)/2;
+  SetPosScaled(C, scoreX, scoreY);
+  C.DrawText(int(GRI.Teams[team].Score));
 
+  //Average ping/PL
+  C.Font = GetFontWithSize(FONT_TEAM_PING);
+  //STRLEN IS FUCKING STUPID
+  C.StrLen("Ping", pingWidth, pingHeight);
+  C.StrLen("PL", plWidth, plHeight);
+  C.StrLen("Ping 999ms", pingMaxWidth, pingMaxHeight);
 
-  //Draw average ping
-  //C.DrawText(@GetAverageTeamPing(teamNum));
+  switch (team)
+  {
+    case 0:
+      x_ping = baseX + 20;
+      x_pl = x_ping + pingWidth - plWidth; 
+      break;
+    case 1:
+      x_ping = baseX + baseWidth - pingMaxWidth;
+      x_pl = x_ping + plWidth;
+      break;
+    default:
+  }
+
+  SetPosScaled(C, x_ping, baseY + (baseHeight - pingHeight - plHeight)/2);
+  C.DrawText("Ping"@GetAverageTeamPing(team)$"ms");  
+  SetPosScaled(C, x_pl, baseY + pingHeight + (baseHeight - pingHeight - plHeight)/2);
+  C.DrawText("PL"@GetAverageTeamPL(team)$"%");
+
+  //Powerups/flag timing
+  C.Font = GetFontWithSize(FONT_TEAM_POWERUP_PER);
+  C.StrLen("100%", powerupPercentWidth, powerupPercentHeight);
+  C.Font = GetFontWithSize(FONT_TEAM_POWERUP_NUM);
+  C.StrLen("99", powerupNumWidth, powerupNumHeight);
+
+  for (x = 0; x < 3; x++) {
+    
+    //TODO: scale icons by resolution
+    //TODO: fix flag/clock so it doesnt look dumb + flag has some extra shit at top right
+    switch (x)
+    {
+      case 0:
+        SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + (baseHeight - 64)/2);
+        C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 0, 164, 73, 82); //amp
+        break;
+      case 1:
+        SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + (baseHeight - 64)/2);
+        C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 1, 248, 64, 64); //100a
+        break;
+      case 2:
+        SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + 35); //clock is short, so move it down
+        C.DrawTile(material'HudContent.Generic.Hud', 40, 40, 148, 354, 40, 40); //clock
+        SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + (baseHeight - 64)/2);
+        C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 335, 126, 62, 77); //flag
+        break;
+      default:
+        
+    }
+
+    SetPosScaled(C, baseX + pingMaxWidth + 100 + 200*x, baseY + (baseHeight - powerupNumHeight - powerupPercentHeight)/2);
+    C.Font = GetFontWithSize(FONT_TEAM_POWERUP_PER);
+    C.DrawText("0%");
+
+    SetPosScaled(C, baseX + pingMaxWidth + 100 + 200*x, baseY + powerupPercentHeight + (baseHeight - powerupNumHeight - powerupPercentHeight)/2);
+    C.Font = GetFontWithSize(FONT_TEAM_POWERUP_NUM);
+    C.DrawText("0");
+  }
 }
 
 /*
  * Draw the background boxes for each player.
  */
-simulated function DrawCTFTeamInfoBoxes(Canvas C, int redPlayerCount, int bluePlayerCount)
+simulated function DrawCTFTeamInfoBoxes(Canvas C, byte team, int playerCount)
 {
-  local int baseHeight, baseWidth, baseY, redBaseX, blueBaseX;
+  local int baseHeight, baseWidth, baseX, baseY;
+  local int rVal, bVal;
   local int x;
   local int alpha;
+
+  switch (team)
+  {
+    case 0:
+      rVal = 255;
+      bVal = 0;
+      baseX = 95;
+      break;
+    case 1:
+      rVal = 0;
+      bVal = 255;
+      baseX = 985;
+    default:    
+  }
 
   baseHeight = 85;
   baseWidth  = 840;
   baseY      = 110+75; //offset+height of header
-  redBaseX   = 95;
-  blueBaseX  = 985;
 
   C.Style = ERenderStyle.STY_Alpha;
 
-  //Red players
-  for (x = 0; x < redPlayerCount; x++) {
-    //x % 2 == 0 ? alpha = 64 : alpha = 84;
+  for (x = 0; x < playerCount; x++) {
     if (x % 2 == 0) {
       alpha = 64;
     } else {
       alpha = 84;
     }
 
-    C.SetDrawColor(255, 0, 0, alpha);
+    C.SetDrawColor(rVal, 0, bVal, alpha);
     
-    SetPosScaled(C, redBaseX, baseY + x*baseHeight);
-    DrawTileStretchedScaled(C, TeamBoxMaterial, baseWidth, baseHeight);
-  }
-
-
-  //Blue players
-  for (x = 0; x < bluePlayerCount; x++) {
-    //x % 2 == 0 ? alpha = 64 : alpha = 84;
-    if (x % 2 == 0) {
-      alpha = 64;
-    } else {
-      alpha = 84;
-    }
-
-    C.SetDrawColor(0, 0, 255, alpha);
-
-    SetPosScaled(C, blueBaseX, baseY + x*baseHeight);
+    SetPosScaled(C, baseX, baseY + x*baseHeight);
     DrawTileStretchedScaled(C, TeamBoxMaterial, baseWidth, baseHeight);
   }
 }
@@ -367,9 +461,123 @@ simulated function DrawCTFTeamInfoBoxes(Canvas C, int redPlayerCount, int bluePl
 /*
  * Score, Ping, PL, Name, and stats for a given player (PRI)
  */
-simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, float x, float y, float scale)
-{
-  //Super.DrawPlayerInformation(C, PRI, x, y, scale);
+simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, float baseX, float baseY, float scale)
+{ 
+  local UTComp_PRI uPRI;
+  local TeamPlayerReplicationInfo tPRI;
+  local float scoreWidth, scoreHeight, maxScoreWidth;
+  local float pingplWidth, pingplHeight;
+  local float playerNameWidth, playerNameHeight;
+  local int boxWidth, boxHeight;
+  local string pingplString;
+  local int count;
+  local array<Stats> statsArray;
+  local float longestOStatName, longestDStatName;
+  local float statX;
+  local Stats stat1, stat2, stat3, stat4, stat5, stat6;
+
+  //TODO: Global this or something
+  boxWidth  = 840;
+  boxHeight = 85;
+
+  uPRI = class'UTComp_Util'.static.GetUTCompPRI(PRI);
+  tPRI = TeamPlayerReplicationInfo(PRI);
+
+  //Score and Ping/PL
+  pingplString = string(PRI.Ping*4)$"ms; "@string(PRI.PacketLoss)$"PL";
+
+  C.Font = GetFontWithSize(FONT_PLAYER_SCORE);
+  C.StrLen(PRI.Score, scoreWidth, scoreHeight);
+  C.StrLen("999", maxScoreWidth, scoreHeight);
+  
+  C.Font = GetFontWithSize(FONT_PLAYER_PING);
+  C.StrLen(pingplString, pingplWidth, pingplHeight);
+
+  C.Font = GetFontWithSize(FONT_PLAYER_SCORE);
+  SetPosScaled(C, baseX + 15, baseY + (boxHeight - scoreHeight - pingplHeight)/2);
+  C.DrawText(int(PRI.Score));
+
+  C.Font = GetFontWithSize(FONT_PLAYER_PING);
+  SetPosScaled(C, baseX + 15 + 3, baseY + scoreHeight + (boxHeight - scoreHeight - pingplHeight)/2);
+  C.DrawText(pingplString);
+
+  //Player Name
+  C.Font = GetFontForPlayerName(PRI.PlayerName);
+  C.StrLen(PRI.PlayerName, playerNameWidth, playerNameHeight);
+  SetPosScaled(C, baseX + 40 + maxScoreWidth, baseY + (boxHeight - playerNameHeight)/2);
+  if (uPRI.ColoredName == "") {
+    C.DrawText(PRI.PlayerName);
+  } else {
+    C.DrawText(uPRI.ColoredName);
+  }
+
+  //Stats
+
+  //TODO: LESS SHITTY PLZ
+  statsArray[statsArray.Length] = stat1;
+  statsArray[0].name = "Grabs";
+  statsArray[0].value = uPRI.FlagGrabs@"("$uPRI.FlagPickups$")";
+
+  statsArray[statsArray.Length] = stat2;
+  statsArray[1].name = "Caps";
+  statsArray[1].value = uPRI.FlagCaps@"("$uPRI.Assists$")";
+
+  statsArray[statsArray.Length] = stat3;
+  statsArray[2].name = "Covers";
+  statsArray[2].value = string(uPRI.Covers);
+
+  statsArray[statsArray.Length] = stat4;
+  statsArray[3].name = "Flag Kills";
+  statsArray[3].value = string(uPRI.FlagKills);
+
+  statsArray[statsArray.Length] = stat5;
+  statsArray[4].name = "Returns";
+  statsArray[4].value = string(tPRI.FlagReturns);
+
+  statsArray[statsArray.Length] = stat6;
+  statsArray[5].name = "Seals";
+  statsArray[5].value = string(uPRI.Seals);
+
+  //Get StrLen shit for spacing
+  for (count = 0; count < 6; count++) {
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT);
+    C.StrLen(statsArray[count].name, statsArray[count].nameW, statsArray[count].nameH);
+    
+    //Find the longest name for both left and right.
+    if (count<3 && statsArray[count].nameW > longestOStatName) {
+      longestOStatName = statsArray[count].nameW;
+    } else if (count>3 && statsArray[count].nameW > longestDStatName) {
+      longestDStatName = statsArray[count].nameW;
+    }
+
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT_NUM);
+    C.StrLen(statsArray[count].value, statsArray[count].valueW, statsArray[count].valueH);
+  }
+  
+
+  statX = baseX + boxWidth - 300;
+  
+  //Left column
+  for (count = 0; count < 3; count++) {
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT);
+    SetPosScaled(C, statX + longestOStatName - statsArray[count].nameW, baseY + (boxHeight - statsArray[count].nameH*3)/2 + statsArray[count].nameH*count);
+    C.DrawText(statsArray[count].name);
+
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT_NUM);
+    SetPosScaled(C, statX + longestOStatName + 5, baseY + (boxHeight - statsArray[count].nameH*3)/2 + statsArray[count].nameH*count);
+    C.DrawText(statsArray[count].value);
+  }
+
+  //Right column
+  for (count = 3; count < 6; count++) {  
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT);
+    SetPosScaled(C, statX + 100 + longestOStatName + longestDStatName - statsArray[count].nameW, baseY + (boxHeight - statsArray[count].nameH*3)/2 + statsArray[count].nameH*(count - 3));
+    C.DrawText(statsArray[count].name);
+
+    C.Font = GetFontWithSize(FONT_PLAYER_STAT_NUM);
+    SetPosScaled(C, statX + 100 + longestOStatName + longestDStatName + 5, baseY + (boxHeight - statsArray[count].nameH*3)/2 + statsArray[count].nameH*(count - 3));
+    C.DrawText(statsArray[count].value);
+  }
 }
 
 /*
@@ -388,7 +596,6 @@ simulated function ArrangeSpecs(out PlayerReplicationInfo PRI[MAXPLAYERS])
  *-----------------
  */
 
-//ScaleX and ScaleY take a percentage value and convert to pixels
 function float ScaleX(Canvas C, float value)
 {
   return C.ClipX * (value/1920);
@@ -416,7 +623,7 @@ function DrawBoxScaled(Canvas C, float w, float h)
 
 function DrawTextJustifiedScaled(Canvas C, coerce string text, byte justification, float x1, float y1, float x2, float y2)
 {
-  C.DrawTextJustified(text, justification, ScaleX(C, x1), ScaleY(C, y1), ScaleX(C, x2), ScaleX(C, y2));
+  C.DrawTextJustified(text, justification, ScaleX(C, x1), ScaleY(C, y1), ScaleX(C, x2), ScaleY(C, y2));
 }
 
 /* 
@@ -493,25 +700,38 @@ function String GetDefaultScoreInfoString()
 
 simulated function string GetAverageTeamPing(byte team)
 {
-    local int i;
-    local float avg;
-    local int NumSamples;
+  local int i;
+  local float avg;
+  local int NumSamples;
 
-    for(i = 0; i < GRI.PRIArray.Length; i++)
+  for(i = 0; i < GRI.PRIArray.Length; i++)
+  {
+    if(!GRI.PRIArray[i].bOnlySpectator && GRI.PRIArray[i].Team != None && GRI.PRIArray[i].Team.TeamIndex == team)
     {
-        if(!GRI.PRIArray[i].bOnlySpectator && GRI.PRIArray[i].Team != None && GRI.PRIArray[i].Team.TeamIndex == team)
-        {
-           Avg += GRI.PRIArray[i].Ping;
-           NumSamples++;
-        }
+      Avg += GRI.PRIArray[i].Ping;
+      NumSamples++;
     }
+  }
 
-    if(NumSamples == 0)
+  return string(int(4.0*Avg/float(NumSamples))); //Why 4?
+}
+
+simulated function string GetAverageTeamPL(byte team)
+{
+  local int i;
+  local float avg;
+  local int numSamples;
+
+  for (i = 0; i < GRI.PRIArray.length; i++)
+  {
+    if (!GRI.PRIArray[i].bOnlySpectator && GRI.PRIArray[i].Team != None && GRI.PRIArray[i].Team.TeamIndex == team)
     {
-      return "";
+      avg += GRI.PRIArray[i].PacketLoss;
+      numSamples++;
     }
+  }
 
-    return string(int(4.0*Avg/float(NumSamples))); //Why 4?
+  return string(int(avg/float(numSamples)));
 }
 
 /*
@@ -532,6 +752,20 @@ static function Font GetFontWithSize(int i)
   }
 
   return default.FontArrayFonts[i];
+}
+
+//TODO: FIX THIS
+simulated function Font GetFontForPlayerName(String playerName)
+{
+  local int length;
+
+  length = Len(playerName);
+
+  if (length >= 14) {
+    return GetFontWithSize(FONT_PLAYER_NAME - 1);
+  } else {
+    return GetFontWithSize(FONT_PLAYER_NAME);
+  }
 }
 
 defaultproperties
