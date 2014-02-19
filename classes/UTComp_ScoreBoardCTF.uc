@@ -21,8 +21,6 @@ var int FONT_PLAYER_STAT_NUM;
 var int FONT_PLAYER_STAT;
 var int FONT_PLAYER_SCORE;
 var int FONT_PLAYER_NAME;
-var int FONT_TEAM_PING_NUM;
-var int FONT_TEAM_PL_NUM;
 var int FONT_TEAM_POWERUP_NUM;
 var int FONT_TEAM_PING;
 var int FONT_TEAM_PL;
@@ -122,13 +120,11 @@ simulated event UpdateScoreBoard(Canvas C)
   FONT_PLAYER_PING      = 1;
   FONT_PLAYER_PL        = 1;
   FONT_PLAYER_LOCATION  = 4;
-  FONT_PLAYER_STAT_NUM  = 3;
-  FONT_PLAYER_STAT      = 2;
+  FONT_PLAYER_STAT_NUM  = 1;
+  FONT_PLAYER_STAT      = 1;
   FONT_PLAYER_SCORE     = 6;
   FONT_PLAYER_NAME      = 6;
-  FONT_TEAM_PING_NUM    = 2;
-  FONT_TEAM_PL_NUM      = 2;
-  FONT_TEAM_POWERUP_NUM = 2;
+  FONT_TEAM_POWERUP_NUM = 3;
   FONT_TEAM_PING        = 3;
   FONT_TEAM_PL          = 3;
   FONT_TEAM_POWERUP_PER = 5;
@@ -397,7 +393,7 @@ simulated function DrawTeamHeader(Canvas C, byte team)
         SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + 35); //clock is short, so move it down
         C.DrawTile(material'HudContent.Generic.Hud', 40, 40, 148, 354, 40, 40); //clock
         SetPosScaled(C, baseX + pingMaxWidth - 64 + 100 + 200*x, baseY + (baseHeight - 64)/2);
-        C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 335, 126, 62, 77); //flag
+        C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 338, 128, 56, 81); //flag
         break;
       default:
         
@@ -475,6 +471,11 @@ simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, fl
   local float longestOStatName, longestDStatName;
   local float statX;
   local Stats stat1, stat2, stat3, stat4, stat5, stat6;
+  local UTComp_Warmup uWarmup;
+
+  foreach dynamicActors(class'UTComp_Warmup', uWarmup) {
+    break;
+  }
 
   //TODO: Global this or something
   boxWidth  = 840;
@@ -483,8 +484,22 @@ simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, fl
   uPRI = class'UTComp_Util'.static.GetUTCompPRI(PRI);
   tPRI = TeamPlayerReplicationInfo(PRI);
 
+  //Ready/Not Ready
+  if (uWarmup.bInWarmup) {
+    if (!uPRI.bIsReady) {
+      C.SetDrawColor(255, 0, 0, 255);
+    } else {
+      C.SetDrawColor(0, 255, 0, 255);
+    }
+
+    
+    SetPosScaled(C, baseX + 20, baseY + (boxHeight - 64)/2);
+    C.DrawTile(material'HudContent.Generic.Hud', 64, 64, 338, 128, 56, 81); //flag, tinted red (?)
+    C.SetDrawColor(255, 255, 255, 255);
+  }
+
   //Score and Ping/PL
-  pingplString = string(PRI.Ping*4)$"ms; "@string(PRI.PacketLoss)$"PL";
+  pingplString = string(PRI.Ping*4)$"ms\ "@string(PRI.PacketLoss)$"%";
 
   C.Font = GetFontWithSize(FONT_PLAYER_SCORE);
   C.StrLen(PRI.Score, scoreWidth, scoreHeight);
@@ -493,9 +508,11 @@ simulated function DrawPlayerInformation(Canvas C, PlayerReplicationInfo PRI, fl
   C.Font = GetFontWithSize(FONT_PLAYER_PING);
   C.StrLen(pingplString, pingplWidth, pingplHeight);
 
+  if (!uWarmup.bInWarmup) {
   C.Font = GetFontWithSize(FONT_PLAYER_SCORE);
   SetPosScaled(C, baseX + 15, baseY + (boxHeight - scoreHeight - pingplHeight)/2);
   C.DrawText(int(PRI.Score));
+  }
 
   C.Font = GetFontWithSize(FONT_PLAYER_PING);
   SetPosScaled(C, baseX + 15 + 3, baseY + scoreHeight + (boxHeight - scoreHeight - pingplHeight)/2);
@@ -776,10 +793,10 @@ defaultproperties
   bDrawPickups=True
   bOverrideDisplayStats=false
   FontArrayNames(0)  = "Engine.DefaultFont"
-  FontArrayNames(1)  = "EurostileRegular.FontEurostile12"
-  FontArrayNames(2)  = "EurostileRegular.FontEurostile14"
+  FontArrayNames(1)  = "2K4Fonts.Verdana12"
+  FontArrayNames(2)  = "2K4Fonts.Verdana14"
   FontArrayNames(3)  = "UT2003Fonts.FontEurostile14"
-  FontArrayNames(4)  = "EurostileRegular.FontEurostile17"
+  FontArrayNames(4)  = "2K4Fonts.Verdana16"
   FontArrayNames(5)  = "UT2003Fonts.FontEurostile17"
   FontArrayNames(6)  = "UT2003Fonts.FontEurostile29"
   FontArrayNames(7)  = "UT2003Fonts.FontEurostile37"
