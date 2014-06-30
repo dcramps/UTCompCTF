@@ -340,9 +340,10 @@ simulated function InitializeScoreboard()
    }
    else if(ClientChangedScoreBoard && !class'UTComp_Settings'.default.bUseDefaultScoreboard)
    {
-       if (Level.Game.IsA('UTComp_xCTFGame'))
-           NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardCTF", class'Class'));
-       else
+       //TODO: SCOREBOARD
+       //if (Level.Game.IsA('UTComp_xCTFGame'))
+       //    NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardCTF", class'Class'));
+       //else
            NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoard", class'Class'));
    }
    if(myHUD!=None && NewScoreBoardClass!=None)

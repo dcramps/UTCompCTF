@@ -901,9 +901,10 @@ function ModifyLogin(out string Portal, out string Options)
     {
         if(bEnableScoreBoard)
         {
-            if (Level.Game.IsA('xCTFGame'))
-                Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoardCTF";
-            else
+            //TODO: SCOREBOARD
+            //if (Level.Game.IsA('xCTFGame'))
+            //    Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoardCTF";
+            //else
                 Level.Game.ScoreBoardType="UTCompCTFv01.UTComp_ScoreBoard";
         }
         else
