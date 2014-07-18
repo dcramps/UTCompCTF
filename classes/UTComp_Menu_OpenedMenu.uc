@@ -13,7 +13,7 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
    // local mutator mut;
 
-    l_Mode[2].Caption="UTComp Version"$class'Gameinfo'.static.MakeColorCode(GoldColor)$" CTF 0.1 alpha";
+    l_Mode[2].Caption="UTComp Version"$class'Gameinfo'.static.MakeColorCode(GoldColor)$" CTF 0.3 alpha";
 
 	Super.InitComponent(myController,MyOwner);
 }
@@ -179,7 +179,7 @@ DefaultProperties
 		WinHeight=0.125000
 		WinLeft=0.312500
 		WinTop=0.307113
-        Image=Texture'UTCompCTFv01.UTCompLogo'
+        Image=Texture'UTCompCTFv03.UTCompLogo'
      End Object
      i_UTCompLogo=GUIImage'UTCompLogo'
 

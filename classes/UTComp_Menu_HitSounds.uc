@@ -80,7 +80,7 @@ function InternalOnChange( GUIComponent C )
     }
     BS_xPlayer(PlayerOwner()).MakeSureSaveConfig();
     class'BS_xPlayer'.Static.StaticSaveConfig();
-    class'UTComp_Settings'.static.staticSaveConfig();
+    SaveSettings();
     DisableStuff();
 }
 
@@ -95,7 +95,7 @@ function bool InternalOnKeyEvent(out byte Key, out byte State, float delta)
     BS_xPlayer(PlayerOwner()).MakeSureSaveConfig();
     BS_xPlayer(PlayerOwner()).LoadedFriendlySound = None;
     BS_xPlayer(PlayerOwner()).LoadedEnemySound = none;
-    class'UTComp_Settings'.static.staticSaveConfig();
+    SaveSettings();
     class'BS_xPlayer'.Static.StaticSaveConfig();
 
     return true;
@@ -115,7 +115,7 @@ defaultproperties
          OnKeyEvent=HitSoundVolume.InternalOnKeyEvent
          OnCapturedMouseMove=HitSoundVolume.InternalCapturedMouseMove
      End Object
-     sl_Volume=GUISlider'UTCompCTFv01.UTComp_Menu_HitSounds.HitSoundVolume'
+     sl_Volume=GUISlider'UTCompCTFv03.UTComp_Menu_HitSounds.HitSoundVolume'
 
      Begin Object Class=GUISlider Name=PitchMod
          MinValue=1.000000
@@ -131,7 +131,7 @@ defaultproperties
          OnKeyEvent=PitchMod.InternalOnKeyEvent
          OnCapturedMouseMove=PitchMod.InternalCapturedMouseMove
      End Object
-     sl_Pitch=GUISlider'UTCompCTFv01.UTComp_Menu_HitSounds.PitchMod'
+     sl_Pitch=GUISlider'UTCompCTFv03.UTComp_Menu_HitSounds.PitchMod'
 
      Begin Object Class=moCheckBox Name=CPMAstyle
          Caption="CPMA Style Hitsounds"
@@ -140,7 +140,7 @@ defaultproperties
          WinLeft=0.250000
          OnChange=UTComp_Menu_HitSounds.InternalOnChange
      End Object
-     ch_CPMAStyle=moCheckBox'UTCompCTFv01.UTComp_Menu_HitSounds.CPMAstyle'
+     ch_CPMAStyle=moCheckBox'UTCompCTFv03.UTComp_Menu_HitSounds.CPMAstyle'
 
      Begin Object Class=moCheckBox Name=EnableHit
          Caption="Enable Hitsounds"
@@ -149,7 +149,7 @@ defaultproperties
          WinLeft=0.250000
          OnChange=UTComp_Menu_HitSounds.InternalOnChange
      End Object
-     ch_EnableHitSounds=moCheckBox'UTCompCTFv01.UTComp_Menu_HitSounds.EnableHit'
+     ch_EnableHitSounds=moCheckBox'UTCompCTFv03.UTComp_Menu_HitSounds.EnableHit'
 
      Begin Object Class=GUIComboBox Name=EnemySound
          WinTop=0.654000
@@ -159,7 +159,7 @@ defaultproperties
          OnChange=UTComp_Menu_HitSounds.InternalOnChange
          OnKeyEvent=UTComp_Menu_HitSounds.InternalOnKeyEvent
      End Object
-     co_EnemySound=GUIComboBox'UTCompCTFv01.UTComp_Menu_HitSounds.EnemySound'
+     co_EnemySound=GUIComboBox'UTCompCTFv03.UTComp_Menu_HitSounds.EnemySound'
 
      Begin Object Class=GUIComboBox Name=TeammateSound
          WinTop=0.704000
@@ -169,7 +169,7 @@ defaultproperties
          OnChange=UTComp_Menu_HitSounds.InternalOnChange
          OnKeyEvent=UTComp_Menu_HitSounds.InternalOnKeyEvent
      End Object
-     co_FriendlySound=GUIComboBox'UTCompCTFv01.UTComp_Menu_HitSounds.TeammateSound'
+     co_FriendlySound=GUIComboBox'UTCompCTFv03.UTComp_Menu_HitSounds.TeammateSound'
 
      Begin Object Class=GUILabel Name=VolumeLabel
          Caption="Hitsound Volume"
@@ -177,7 +177,7 @@ defaultproperties
          WinTop=0.390000
          WinLeft=0.250000
      End Object
-     l_Volume=GUILabel'UTCompCTFv01.UTComp_Menu_HitSounds.VolumeLabel'
+     l_Volume=GUILabel'UTCompCTFv03.UTComp_Menu_HitSounds.VolumeLabel'
 
      Begin Object Class=GUILabel Name=PitchLabel
          Caption="CPMA Pitch Modifier"
@@ -185,7 +185,7 @@ defaultproperties
          WinTop=0.540000
          WinLeft=0.250000
      End Object
-     l_Pitch=GUILabel'UTCompCTFv01.UTComp_Menu_HitSounds.PitchLabel'
+     l_Pitch=GUILabel'UTCompCTFv03.UTComp_Menu_HitSounds.PitchLabel'
 
      Begin Object Class=GUILabel Name=EnemySoundLabel
          Caption="Enemy Sound"
@@ -193,7 +193,7 @@ defaultproperties
          WinTop=0.640000
          WinLeft=0.250000
      End Object
-     l_EnemySound=GUILabel'UTCompCTFv01.UTComp_Menu_HitSounds.EnemySoundLabel'
+     l_EnemySound=GUILabel'UTCompCTFv03.UTComp_Menu_HitSounds.EnemySoundLabel'
 
      Begin Object Class=GUILabel Name=FriendlySoundLabel
          Caption="Team Sound"
@@ -201,6 +201,6 @@ defaultproperties
          WinTop=0.690000
          WinLeft=0.250000
      End Object
-     l_FriendlySound=GUILabel'UTCompCTFv01.UTComp_Menu_HitSounds.FriendlySoundLabel'
+     l_FriendlySound=GUILabel'UTCompCTFv03.UTComp_Menu_HitSounds.FriendlySoundLabel'
 
 }

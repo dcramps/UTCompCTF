@@ -29,7 +29,7 @@ function InternalOnChange( GUIComponent C )
         case ch_speed:  class'UTComp_Settings'.default.bDisableSpeed=!ch_Speed.IsChecked(); break;
         case ch_berserk: class'UTComp_Settings'.default.bDisableberserk=!ch_Berserk.IsChecked(); break;
     }
-    class'UTComp_Settings'.static.staticSaveConfig();
+    SaveSettings();
 }
 
 
@@ -43,7 +43,7 @@ DefaultProperties
 		WinLeft=0.250000
 		WinTop=0.36
      End Object
-     l_Adren=GUILabel'UTCompCTFv01.UTComp_Menu_AdrenMenu.AdrenLabel'
+     l_Adren=GUILabel'UTCompCTFv03.UTComp_Menu_AdrenMenu.AdrenLabel'
 
 
      Begin Object Class=moCheckBox Name=BoosterCheck
@@ -55,7 +55,7 @@ DefaultProperties
 		WinTop=0.430000
          OnChange=UTComp_Menu_AdrenMenu.InternalOnChange
      End Object
-     ch_Booster=moCheckBox'UTCompCTFv01.UTComp_Menu_AdrenMenu.BoosterCheck'
+     ch_Booster=moCheckBox'UTCompCTFv03.UTComp_Menu_AdrenMenu.BoosterCheck'
 
       Begin Object Class=moCheckBox Name=InvisCheck
         Caption="Enable Invisibility Combo"
@@ -66,7 +66,7 @@ DefaultProperties
 		WinTop=0.480000
          OnChange=UTComp_Menu_AdrenMenu.InternalOnChange
      End Object
-     ch_Invis=moCheckBox'UTCompCTFv01.UTComp_Menu_AdrenMenu.InvisCheck'
+     ch_Invis=moCheckBox'UTCompCTFv03.UTComp_Menu_AdrenMenu.InvisCheck'
 
           Begin Object Class=moCheckBox Name=SpeedCheck
         Caption="Enable Speed Combo"
@@ -77,7 +77,7 @@ DefaultProperties
 		WinTop=0.530000
          OnChange=UTComp_Menu_AdrenMenu.InternalOnChange
      End Object
-     ch_Speed=moCheckBox'UTCompCTFv01.UTComp_Menu_AdrenMenu.SpeedCheck'
+     ch_Speed=moCheckBox'UTCompCTFv03.UTComp_Menu_AdrenMenu.SpeedCheck'
 
      Begin Object Class=moCheckBox Name=BerserkCheck
         Caption="Enable Berserk Combo"
@@ -88,5 +88,5 @@ DefaultProperties
 		WinTop=0.580000
          OnChange=UTComp_Menu_AdrenMenu.InternalOnChange
      End Object
-     ch_Berserk=moCheckBox'UTCompCTFv01.UTComp_Menu_AdrenMenu.BerserkCheck'
+     ch_Berserk=moCheckBox'UTCompCTFv03.UTComp_Menu_AdrenMenu.BerserkCheck'
 }

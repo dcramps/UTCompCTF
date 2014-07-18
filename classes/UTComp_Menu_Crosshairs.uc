@@ -183,7 +183,7 @@ function InternalOnChange( GUIComponent C )
                               break;
                           }
     }
-    class'UTComp_HudSettings'.static.StaticSaveConfig();
+    SaveHUDSettings();
     UpdateImages();
     RefreshFullCrossHair();
     DisableStuff();
@@ -713,36 +713,36 @@ defaultproperties
     End Object
     i_TotalHair(11)=GUIImage'TotalHairImage0'
 
-    UTCompNewHairs(0)=(xHairName="Big Circle(0)",xHairTexture=Texture'UTCompCTFv01.BigCircle')
-    UTCompNewHairs(1)=(xHairName="Big Circle(1)",xHairTexture=Texture'UTCompCTFv01.MedCircle')
-    UTCompNewHairs(2)=(xHairName="Big Circle(2)",xHairTexture=Texture'UTCompCTFv01.SmallCircle')
-    UTCompNewHairs(3)=(xHairName="Big Circle(3)",xHairTexture=Texture'UTCompCTFv01.UberSmallCircle')
+    UTCompNewHairs(0)=(xHairName="Big Circle(0)",xHairTexture=Texture'UTCompCTFv03.BigCircle')
+    UTCompNewHairs(1)=(xHairName="Big Circle(1)",xHairTexture=Texture'UTCompCTFv03.MedCircle')
+    UTCompNewHairs(2)=(xHairName="Big Circle(2)",xHairTexture=Texture'UTCompCTFv03.SmallCircle')
+    UTCompNewHairs(3)=(xHairName="Big Circle(3)",xHairTexture=Texture'UTCompCTFv03.UberSmallCircle')
 
-    UTCompNewHairs(4)=(xHairName="Small Circle(0)",xHairTexture=Texture'UTCompCTFv01.BigCircle_2')
-    UTCompNewHairs(5)=(xHairName="Small Circle(1)",xHairTexture=Texture'UTCompCTFv01.MedCircle_2')
-    UTCompNewHairs(6)=(xHairName="Small Circle(2)",xHairTexture=Texture'UTCompCTFv01.SmallCircle_2')
-    UTCompNewHairs(7)=(xHairName="Small Circle(3)",xHairTexture=Texture'UTCompCTFv01.UberSmallCircle_2')
+    UTCompNewHairs(4)=(xHairName="Small Circle(0)",xHairTexture=Texture'UTCompCTFv03.BigCircle_2')
+    UTCompNewHairs(5)=(xHairName="Small Circle(1)",xHairTexture=Texture'UTCompCTFv03.MedCircle_2')
+    UTCompNewHairs(6)=(xHairName="Small Circle(2)",xHairTexture=Texture'UTCompCTFv03.SmallCircle_2')
+    UTCompNewHairs(7)=(xHairName="Small Circle(3)",xHairTexture=Texture'UTCompCTFv03.UberSmallCircle_2')
 
-    UTCompNewHairs(8)=(xHairName="Big Square(0)",xHairTexture=Texture'UTCompCTFv01.BigSquare')
-    UTCompNewHairs(9)=(xHairName="Big Square(1)",xHairTexture=Texture'UTCompCTFv01.BigSquare_2')
-    UTCompNewHairs(10)=(xHairName="Big Square(2)",xHairTexture=Texture'UTCompCTFv01.BigSquare_3')
+    UTCompNewHairs(8)=(xHairName="Big Square(0)",xHairTexture=Texture'UTCompCTFv03.BigSquare')
+    UTCompNewHairs(9)=(xHairName="Big Square(1)",xHairTexture=Texture'UTCompCTFv03.BigSquare_2')
+    UTCompNewHairs(10)=(xHairName="Big Square(2)",xHairTexture=Texture'UTCompCTFv03.BigSquare_3')
 
-    UTCompNewHairs(11)=(xHairName="Big diamond(0)",xHairTexture=Texture'UTCompCTFv01.Bigdiamond')
-    UTCompNewHairs(12)=(xHairName="Big Diamond(1)",xHairTexture=Texture'UTCompCTFv01.Bigdiamond_2')
-    UTCompNewHairs(13)=(xHairName="Big Diamond(2)",xHairTexture=Texture'UTCompCTFv01.Bigdiamond_3')
+    UTCompNewHairs(11)=(xHairName="Big diamond(0)",xHairTexture=Texture'UTCompCTFv03.Bigdiamond')
+    UTCompNewHairs(12)=(xHairName="Big Diamond(1)",xHairTexture=Texture'UTCompCTFv03.Bigdiamond_2')
+    UTCompNewHairs(13)=(xHairName="Big Diamond(2)",xHairTexture=Texture'UTCompCTFv03.Bigdiamond_3')
 
-    UTCompNewHairs(14)=(xHairName="Big Horiz",xHairTexture=Texture'UTCompCTFv01.SmallVert')
-    UTCompNewHairs(15)=(xHairName="Small Horiz",xHairTexture=Texture'UTCompCTFv01.BigVert')
-    UTCompNewHairs(16)=(xHairName="Big Vert",xHairTexture=Texture'UTCompCTFv01.SmallHoriz')
-    UTCompNewHairs(17)=(xHairName="Small Vert",xHairTexture=Texture'UTCompCTFv01.BigHoriz')
+    UTCompNewHairs(14)=(xHairName="Big Horiz",xHairTexture=Texture'UTCompCTFv03.SmallVert')
+    UTCompNewHairs(15)=(xHairName="Small Horiz",xHairTexture=Texture'UTCompCTFv03.BigVert')
+    UTCompNewHairs(16)=(xHairName="Big Vert",xHairTexture=Texture'UTCompCTFv03.SmallHoriz')
+    UTCompNewHairs(17)=(xHairName="Small Vert",xHairTexture=Texture'UTCompCTFv03.BigHoriz')
 
-    UTCompNewHairs(18)=(xHairName="Big 'L'(0)",xHairTexture=Texture'UTCompCTFv01.BigBracket')
-    UTCompNewHairs(19)=(xHairName="Big 'L'(1)",xHairTexture=Texture'UTCompCTFv01.BigBracket_1')
-    UTCompNewHairs(20)=(xHairName="Big 'L'(2)",xHairTexture=Texture'UTCompCTFv01.BigBracket_2')
-    UTCompNewHairs(21)=(xHairName="Big 'L'(3)",xHairTexture=Texture'UTCompCTFv01.BigBracket_3')
-    UTCompNewHairs(22)=(xHairName="Big 'L'(4)",xHairTexture=Texture'UTCompCTFv01.BigBracket_4')
-    UTCompNewHairs(23)=(xHairName="Big 'L'(5)",xHairTexture=Texture'UTCompCTFv01.BigBracket_5')
-    UTCompNewHairs(24)=(xHairName="Big 'L'(6)",xHairTexture=Texture'UTCompCTFv01.BigBracket_6')
-    UTCompNewHairs(25)=(xHairName="Big 'L'(7)",xHairTexture=Texture'UTCompCTFv01.BigBracket_7')
+    UTCompNewHairs(18)=(xHairName="Big 'L'(0)",xHairTexture=Texture'UTCompCTFv03.BigBracket')
+    UTCompNewHairs(19)=(xHairName="Big 'L'(1)",xHairTexture=Texture'UTCompCTFv03.BigBracket_1')
+    UTCompNewHairs(20)=(xHairName="Big 'L'(2)",xHairTexture=Texture'UTCompCTFv03.BigBracket_2')
+    UTCompNewHairs(21)=(xHairName="Big 'L'(3)",xHairTexture=Texture'UTCompCTFv03.BigBracket_3')
+    UTCompNewHairs(22)=(xHairName="Big 'L'(4)",xHairTexture=Texture'UTCompCTFv03.BigBracket_4')
+    UTCompNewHairs(23)=(xHairName="Big 'L'(5)",xHairTexture=Texture'UTCompCTFv03.BigBracket_5')
+    UTCompNewHairs(24)=(xHairName="Big 'L'(6)",xHairTexture=Texture'UTCompCTFv03.BigBracket_6')
+    UTCompNewHairs(25)=(xHairName="Big 'L'(7)",xHairTexture=Texture'UTCompCTFv03.BigBracket_7')
 
 }

@@ -136,8 +136,8 @@ function ScoreFlag(Controller Scorer)
       // figure out who's closer
       if (IsInZone(Scorer, TeamNum))  // In your team's zone
       {
-        Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv01.MutUTComp'.Default.BaseReturnBonus;
-        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv01.MutUTComp'.Default.BaseReturnBonus, "flag_ret_friendly");
+        Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv03.MutUTComp'.Default.BaseReturnBonus;
+        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv03.MutUTComp'.Default.BaseReturnBonus, "flag_ret_friendly");
       }
       else if (IsInZone(Scorer, 1 - TeamNum))
       {
@@ -149,14 +149,14 @@ function ScoreFlag(Controller Scorer)
         }
         else
         {
-          Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv01.MutUTComp'.Default.EnemyBaseReturnBonus;
-          Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv01.MutUTComp'.Default.EnemyBaseReturnBonus, "flag_ret_enemy");
+          Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv03.MutUTComp'.Default.EnemyBaseReturnBonus;
+          Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv03.MutUTComp'.Default.EnemyBaseReturnBonus, "flag_ret_enemy");
         }
       }
       else
       {
-        Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv01.MutUTComp'.Default.MidReturnBonus;
-        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv01.MutUTComp'.Default.MidReturnBonus, "flag_ret_mid");
+        Scorer.PlayerReplicationInfo.Score += class'UTCompCTFv03.MutUTComp'.Default.MidReturnBonus;
+        Level.Game.ScoreEvent(Scorer.PlayerReplicationInfo, class'UTCompCTFv03.MutUTComp'.Default.MidReturnBonus, "flag_ret_mid");
       }
     }
 
@@ -213,10 +213,10 @@ function GiveCoverSealBonus()
             {
                 iF (uPRI.SealSpree > 0)
                 {
-                    bonus = uPRI.SealSpree * class'UTCompCTFv01.MutUTComp'.Default.SealBonus;
+                    bonus = uPRI.SealSpree * class'UTCompCTFv03.MutUTComp'.Default.SealBonus;
                     PRI.Score += Int(bonus);
 
-                    if (class'UTCompCTFv01.MutUTComp'.Default.bShowSealRewardConsoleMsg)
+                    if (class'UTCompCTFv03.MutUTComp'.Default.bShowSealRewardConsoleMsg)
                     {
                         if (C.Pawn != None)
                         {
@@ -228,10 +228,10 @@ function GiveCoverSealBonus()
 
                 if (uPRI.CoverSpree > 0)
                 {
-                    bonus = uPRI.CoverSpree * class'UTCompCTFv01.MutUTComp'.Default.CoverBonus;
+                    bonus = uPRI.CoverSpree * class'UTCompCTFv03.MutUTComp'.Default.CoverBonus;
                     PRI.Score += Int(bonus);
 
-                    if (class'UTCompCTFv01.MutUTComp'.Default.bShowSealRewardConsoleMsg)
+                    if (class'UTCompCTFv03.MutUTComp'.Default.bShowSealRewardConsoleMsg)
                     {
                         if (C.Pawn != None)
                         {
@@ -270,21 +270,21 @@ function RewardFlagCarriers()
       if (totalTime == 0)
         bonus = 0;
       else
-        bonus = (FlagCarriers[i].Time / totalTime) * (7 + class'UTCompCTFv01.MutUTComp'.Default.CapBonus);
+        bonus = (FlagCarriers[i].Time / totalTime) * (7 + class'UTCompCTFv03.MutUTComp'.Default.CapBonus);
 
       // At least 5 points for the capper
       if (FlagCarriers[i].C == OldHolder.Controller)
       {
-        bonus = Max(bonus, class'UTCompCTFv01.MutUTComp'.Default.MinimalCapBonus);
+        bonus = Max(bonus, class'UTCompCTFv03.MutUTComp'.Default.MinimalCapBonus);
 
-        if (class'UTCompCTFv01.MutUTComp'.Default.bShowAssistConsoleMsg) 
+        if (class'UTCompCTFv03.MutUTComp'.Default.bShowAssistConsoleMsg) 
           FlagCarriers[i].C.Pawn.ClientMessage("You get " $ Int(Bonus) $ " bonus pts for the Capture!" @ CarriedString(FlagCarriers[i].Time, totalTime));
       }
       else
       {
         bonus = Max(bonus, 1);
         
-        if (class'UTCompCTFv01.MutUTComp'.Default.bShowAssistConsoleMsg) 
+        if (class'UTCompCTFv03.MutUTComp'.Default.bShowAssistConsoleMsg) 
           FlagCarriers[i].C.Pawn.ClientMessage("You get " $ Int(Bonus) $ " pts for the Assist!" @ CarriedString(FlagCarriers[i].Time, TotalTime));
 
         uPRI = class'UTComp_Util'.static.GetUTCompPRI(FlagCarriers[i].C.PlayerReplicationInfo);
@@ -328,7 +328,7 @@ auto state Home
       uPRI = class'UTComp_Util'.static.GetUTCompPRI(c.PlayerReplicationInfo);
       uPRI.FlagGrabs++;
 
-      c.PlayerReplicationInfo.Score += class'UTCompCTFv01.MutUTComp'.Default.GrabBonus;
+      c.PlayerReplicationInfo.Score += class'UTCompCTFv03.MutUTComp'.Default.GrabBonus;
 
       Super.LogTaken(c);
     }

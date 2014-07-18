@@ -10,9 +10,9 @@ function bool InternalOnClick(GUIComponent C)
 {
     switch(C)
     {
-        case bu_GameTypeMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv01.UTComp_Menu_Voting_GameType"); break;
-        case bu_MapChangeMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv01.UTComp_Menu_Voting_Map");  break;
-        case bu_UTComp_SettingsMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv01.UTComp_Menu_Voting_Settings");    break;
+        case bu_GameTypeMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv03.UTComp_Menu_Voting_GameType"); break;
+        case bu_MapChangeMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv03.UTComp_Menu_Voting_Map");  break;
+        case bu_UTComp_SettingsMenu:  PlayerOwner().ClientReplaceMenu("UTCompCTFv03.UTComp_Menu_Voting_Settings");    break;
     }
     Blehz();
     return super.InternalOnClick(C);
@@ -56,7 +56,7 @@ defaultproperties
          OnClick=UTComp_Menu_Voting.InternalOnClick
          OnKeyEvent=GameTypeButton.InternalOnKeyEvent
      End Object
-     bu_GameTypeMenu=GUIButton'UTCompCTFv01.UTComp_Menu_Voting.GameTypeButton'
+     bu_GameTypeMenu=GUIButton'UTCompCTFv03.UTComp_Menu_Voting.GameTypeButton'
 
      Begin Object Class=GUIButton Name=MapChangeButton
          Caption="Change Map"
@@ -67,7 +67,7 @@ defaultproperties
          OnClick=UTComp_Menu_Voting.InternalOnClick
          OnKeyEvent=MapChangeButton.InternalOnKeyEvent
      End Object
-     bu_MapChangeMenu=GUIButton'UTCompCTFv01.UTComp_Menu_Voting.MapChangeButton'
+     bu_MapChangeMenu=GUIButton'UTCompCTFv03.UTComp_Menu_Voting.MapChangeButton'
 
      Begin Object Class=GUIButton Name=UTComp_SettingsButton
          Caption="Settings"
@@ -78,7 +78,7 @@ defaultproperties
          OnClick=UTComp_Menu_Voting.InternalOnClick
          OnKeyEvent=UTComp_SettingsButton.InternalOnKeyEvent
      End Object
-     bu_UTComp_SettingsMenu=GUIButton'UTCompCTFv01.UTComp_Menu_Voting.UTComp_SettingsButton'
+     bu_UTComp_SettingsMenu=GUIButton'UTCompCTFv03.UTComp_Menu_Voting.UTComp_SettingsButton'
 
      Begin Object class=GUILabel Name=DemnoHeadingLabel
         Caption="------- Select your voting type -------"

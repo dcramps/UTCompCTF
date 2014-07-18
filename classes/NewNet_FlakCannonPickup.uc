@@ -3,5 +3,5 @@ class NewNet_FlakCannonPickup extends FlakCannonPickup;
 
 defaultproperties
 {
-     InventoryType=Class'UTCompCTFv01.NewNet_FlakCannon'
+     InventoryType=Class'UTCompCTFv03.NewNet_FlakCannon'
 }

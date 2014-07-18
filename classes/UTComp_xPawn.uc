@@ -106,7 +106,7 @@ function int NewShieldAbsorb(int dam)
 
 simulated function UpdatePrecacheMaterials()
 {
-	Level.AddPrecacheMaterial(Material'UTCompCTFv01.PurpleMarker');
+	Level.AddPrecacheMaterial(Material'UTCompCTFv03.PurpleMarker');
 	Super.UpdatePrecacheMaterials();
 }
 
@@ -196,7 +196,7 @@ simulated function TickFX(float DeltaTime)
 		else if(ColorMode==2)
             texture = texture'BlueMarker_t';
         else if(ColorMode==3)
-            texture = texture'UTCompCTFv01.PurpleMarker';
+            texture = texture'UTCompCTFv03.PurpleMarker';
         else if ( PlayerReplicationInfo.Team.TeamIndex == 0 )
 			texture = Texture'RedMarker_t';
 		else

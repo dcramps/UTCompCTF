@@ -238,7 +238,7 @@ function DrawWelcomeBanner(Canvas canvas)
   Canvas.DrawText("This server is running");
   Canvas.StrLen("W", StrLenX3, StrLenY3);
   Canvas.SetPos(currentX, currentY+1*(StrLenY3+2.0));
-  Canvas.DrawText("UTComp "$MakeColorCode(class'Hud'.Default.GoldColor)$"CTF 0.1 alpha"$MakeColorCode(InfoTextColor)$".");
+  Canvas.DrawText("UTComp "$MakeColorCode(class'Hud'.Default.GoldColor)$"CTF 0.3 alpha"$MakeColorCode(InfoTextColor)$".");
   Canvas.SetPos(currentX, currentY+3*(StrLenY3+2.0));
   Canvas.DrawText("Press "$MakeColorCode(class'Hud'.Default.GoldColor)$class'GameInfo'.Static.GetKeyBindName("mymenu", PC)$MakeColorCode(InfoTextColor)$" to change");
   Canvas.SetPos(currentX, currentY+4*(StrLenY3+2.0));
@@ -494,7 +494,7 @@ function DrawPowerups(Canvas canvas, PlayerReplicationInfo PRI)
     if (uPRI.PowerupInfo[i].Pickup == None)
       break;
 
-    nextRespawn = uPRI.PowerupInfo[i].NextRespawnTime - Level.GRI.ElapsedTime;
+    nextRespawn = (uPRI.PowerupInfo[i].NextRespawnTime - Level.GRI.ElapsedTime) / Level.TimeDilation;
 
     if (!bAlwaysShowPowerups && nextRespawn > 10)
       break;

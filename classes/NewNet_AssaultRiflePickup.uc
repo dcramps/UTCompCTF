@@ -3,5 +3,5 @@ class NewNet_AssaultRiflePickup extends AssaultRiflePickup;
 
 defaultproperties
 {
-     InventoryType=Class'UTCompCTFv01.NewNet_AssaultRifle'
+     InventoryType=Class'UTCompCTFv03.NewNet_AssaultRifle'
 }

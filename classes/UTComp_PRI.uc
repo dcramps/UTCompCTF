@@ -102,7 +102,7 @@ var bool bMapListCompleted;
 
 var localized string WepStatNames[15];
 
-var string HitPrim,HitAlt,FiredPrim,FiredAlt,DamagePrim,DamageAlt;
+var string HitPrim, HitAlt, FiredPrim, FiredAlt, DamagePrim, DamageAlt;
 
 replication
 {

@@ -257,7 +257,7 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
             if (victimPRI.HasFlag != None)
             {
                 killeruPRI.FlagKills++;
-                killerPRI.Score += class'UTCompCTFv01.MutUTComp'.Default.FlagKillBonus;
+                killerPRI.Score += class'UTCompCTFv03.MutUTComp'.Default.FlagKillBonus;
             }
             else if (killerPRI.HasFlag == None && killerTeamFC != None)
             {
@@ -269,6 +269,7 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
                 // d) The victim is 1024uu close to the FC and the killer can see the FC
                 // e) The victim is 768uu close and is in line-of-sight of the FC (but not necessarely looking at him).
                 
+                /*
                 Log("_Killer:" @ killerPRI.PlayerName);
                 Log("_Killer FC:" @ killerTeamFC.PlayerReplicationInfo.PlayerName);
                 Log("KillerTeamFCPosition:"@killerTeamFCPosition);
@@ -278,6 +279,7 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
                 Log("__VictimCanSeeFC:" @ Victim.Controller.CanSee(killerTeamFC));
                 Log("__KillerCanSeeFC:" @ Killer.CanSee(killerTeamFC));
                 Log("__VictimLOSFC:" @ Victim.Controller.lineOfSightTo(killerTeamFC));
+                */
 
                 // I actually increased the numbers by 20%. Those (in the comments) were the UT99 numbers
                 if ((VSize(Victim.Location - killerTeamFCPosition) < 614.4)
@@ -289,37 +291,31 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
 
                     killeruPRI.Covers++;
                     killeruPRI.CoverSpree++;
-                    killerPRI.Score += class'UTCompCTFv01.MutUTComp'.Default.CoverBonus;
+                    killerPRI.Score += class'UTCompCTFv03.MutUTComp'.Default.CoverBonus;
 
                     Log("Cover - "@killerPRI.PlayerName);
 
                     // CoverSpree!
                     if (killeruPRI.CoverSpree == 3)
                     {
-                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 1) 
-                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(4 + 64, killerPRI, victimPRI));
-                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
-                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        if (class'UTCompCTFv03.MutUTComp'.Default.CoverSpreeMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv03.UTComp_CTFMessage'.static.GetString(4 + 64, killerPRI, victimPRI));
                         else
-                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 4, killerPRI, victimPRI);
+                            BroadcastLocalizedMessage(class'UTCompCTFv03.UTComp_CTFMessage', 4, killerPRI, victimPRI);
                     }
-                    else if (killeruPRI.CoverSpree == 4 && class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType > 0)
+                    else if (killeruPRI.CoverSpree == 4 && class'UTCompCTFv03.MutUTComp'.Default.CoverSpreeMsgType > 0)
                     {
-                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 1) 
-                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(5 + 64, killerPRI, victimPRI));
-                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
-                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        if (class'UTCompCTFv03.MutUTComp'.Default.CoverSpreeMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv03.UTComp_CTFMessage'.static.GetString(5 + 64, killerPRI, victimPRI));
                         else
-                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 5, killerPRI, victimPRI);
+                            BroadcastLocalizedMessage(class'UTCompCTFv03.UTComp_CTFMessage', 5, killerPRI, victimPRI);
                     }
-                    else if (class'UTCompCTFv01.MutUTComp'.Default.CoverMsgType > 0) // Normal Cover
+                    else if (class'UTCompCTFv03.MutUTComp'.Default.CoverMsgType > 0) // Normal Cover
                     {
-                        if (class'UTCompCTFv01.MutUTComp'.Default.CoverMsgType == 1) 
-                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(0 + 64, killerPRI, victimPRI));
-                        //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
-                        //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
+                        if (class'UTCompCTFv03.MutUTComp'.Default.CoverMsgType == 1) 
+                            Killer.Pawn.ClientMessage(class'UTCompCTFv03.UTComp_CTFMessage'.static.GetString(0 + 64, killerPRI, victimPRI));
                         else
-                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 0, killerPRI, victimPRI);
+                            BroadcastLocalizedMessage(class'UTCompCTFv03.UTComp_CTFMessage', 0, killerPRI, victimPRI);
                     }
                 }
 
@@ -333,14 +329,12 @@ function bool PreventDeath(Pawn Victim, Controller Killer, class<DamageType> dam
                         killeruPRI.SealSpree++;
                         killeruPRI.DefKills++; // seal is also a defkill
 
-                        if (class'UTCompCTFv01.MutUTComp'.Default.SealMsgType > 0 && killeruPRI.SealSpree == 2) // Sealing base
+                        if (class'UTCompCTFv03.MutUTComp'.Default.SealMsgType > 0 && killeruPRI.SealSpree == 2) // Sealing base
                         {
-                          if (class'UTCompCTFv01.MutUTComp'.Default.SealMsgType == 1) 
-                            Killer.Pawn.ClientMessage(class'UTCompCTFv01.UTComp_CTFMessage'.static.GetString(1 + 64, killerPRI, victimPRI));
-                            //else if (class'UTCompCTFv01.MutUTComp'.Default.CoverSpreeMsgType == 2) 
-                            //  BroadcastMessage(class'UTComp_CTFMessage'.static.GetString(4, killerPRI, victimPRI));
-                        else
-                            BroadcastLocalizedMessage(class'UTCompCTFv01.UTComp_CTFMessage', 1, killerPRI, victimPRI);
+                            if (class'UTCompCTFv03.MutUTComp'.Default.SealMsgType == 1) 
+                                Killer.Pawn.ClientMessage(class'UTCompCTFv03.UTComp_CTFMessage'.static.GetString(1 + 64, killerPRI, victimPRI));
+                            else
+                                BroadcastLocalizedMessage(class'UTCompCTFv03.UTComp_CTFMessage', 1, killerPRI, victimPRI);
                         }
                     }
                 }

@@ -4,6 +4,29 @@ var UTComp_PRI uPRI;
 
 var localized string FlagCaps, FlagGrabs, FlagPickups, FlagKills, FlagSaves, FlagDenials, Assists, Covers, Seals, DefKills;
 
+function NextStats()
+{
+	local int i,j;
+
+	if ( (PlayerOwner == None) || (PlayerOwner.GameReplicationInfo == None) )
+		return;
+
+	LastUpdateTime = 0;
+	for ( i=0; i<PlayerOwner.GameReplicationInfo.PRIArray.Length-1; i++ )
+		if ( PRI == PlayerOwner.GameReplicationInfo.PRIArray[i] )
+		{
+			for ( j=i+1; j<PlayerOwner.GameReplicationInfo.PRIArray.Length; j++ )
+			{
+				PRI = TeamPlayerReplicationInfo(PlayerOwner.GameReplicationInfo.PRIArray[j]);
+				uPRI = class'UTComp_Util'.static.GetUTCompPRI(PRI);
+				if ( PRI != None )
+					return;
+			}
+		}
+	PRI = TeamPlayerReplicationInfo(PlayerOwner.GameReplicationInfo.PRIArray[0]);
+	uPRI = class'UTComp_Util'.static.GetUTCompPRI(PRI);
+}
+
 simulated event DrawScoreboard( Canvas C )
 {
 	local int i,j, temp, AwardsNum, CombosNum,GoalsNum;
@@ -49,6 +72,7 @@ simulated event DrawScoreboard( Canvas C )
 	{
 		LastUpdateTime = Level.TimeSeconds;
 		PlayerOwner.ServerUpdateStats(PRI);
+		BS_xPlayer(PlayerOwner).RequestCTFStats(uPRI);
 	}
 	C.DrawColor = HUDClass.default.WhiteColor;
 

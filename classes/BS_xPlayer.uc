@@ -118,13 +118,33 @@ replication
         ServerAdminReady, BroadCastVote, BroadCastReady;
 
     unreliable if(role < Role_Authority)
-        RequestStats;
+        RequestStats, RequestCTFStats;
     unreliable if(Role == Role_Authority)
         SendHitPrim,SendHitAlt,SendFiredPrim,SendFiredAlt,
-        SendDamagePrim,SendDamageAlt,sendDamageGR,sendPickups;
+        SendDamagePrim,SendDamageAlt,SendDamageGR,SendPickups,
+        SendCTFStats;
 }
 
+simulated function SaveSettings()
+{
 
+  local UTComp_Settings settings;
+  Log("Saving settings");
+  settings = Spawn(class'UTComp_Settings');
+  settings.saveClientConfig();
+}
+
+simulated function LoadSettings()
+{
+  
+  local UTComp_Settings settings;
+  local UTComp_HUDSettings hudSettings;
+  Log("Loading settings");
+  settings = Spawn(class'UTComp_Settings');
+  hudSettings = Spawn(class'UTComp_HUDSettings');
+  settings.loadClientConfig();
+  hudSettings.loadClientConfig();
+}
 
 exec function SetEnemySkinColor(string S)
 {
@@ -132,15 +152,15 @@ exec function SetEnemySkinColor(string S)
 
     Split(S, " ", Parts);
 
-    if(Parts.length >=3)
+    if (Parts.length >=3)
     {
-    class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.R=byte(Parts[0]);
-    class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.G=byte(Parts[1]);
-    class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.B=byte(Parts[2]);
-    class'utcomp_settings'.StaticSaveConfig();
+      class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.R=byte(Parts[0]);
+      class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.G=byte(Parts[1]);
+      class'UTComp_Settings'.default.BlueEnemyUTCompSkinColor.B=byte(Parts[2]);
+      SaveSettings();
     }
     else
-    echo("Invalid command, need 3 colors");
+      echo("Invalid command, need 3 colors");
 }
 
 exec function SetFriendSkinColor(string S)
@@ -150,13 +170,13 @@ exec function SetFriendSkinColor(string S)
     Split(S, " ", Parts);
         if(Parts.length >=3)
     {
-    class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.R=byte(Parts[0]);
-    class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.G=byte(Parts[1]);
-    class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.B=byte(Parts[2]);
-    class'utcomp_settings'.StaticSaveConfig();
+      class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.R=byte(Parts[0]);
+      class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.G=byte(Parts[1]);
+      class'UTComp_Settings'.default.RedTeammateUTCompSkinColor.B=byte(Parts[2]);
+      SaveSettings();
     }
     else
-    echo("Invalid command, need 3 colors");
+      echo("Invalid command, need 3 colors");
 }
 
 
@@ -183,45 +203,15 @@ exec function SetStats(int i)
 
 simulated function MakeSureSaveConfig()
 {
-  /*local int i;
 
-  bStats = class'UTComp_Settings'.default.bStats;
-  bEnableUTCompAutoDemorec = class'UTComp_Settings'.default.bEnableUTCompAutoDemorec;
-  DemoRecordingMask = class'UTComp_Settings'.default.DemoRecordingMask;
-  bEnableAutoScreenshot = class'UTComp_Settings'.default.bEnableAutoScreenshot;
-  ScreenShotMask = class'UTComp_Settings'.default.ScreenShotMask;
-  FriendlySound = class'UTComp_Settings'.default.FriendlySound;
-  EnemySound = class'UTComp_Settings'.default.EnemySound;
-  bEnableHitSounds = class'UTComp_Settings'.default.bEnableHitSounds;
-  HitSoundVolume = class'UTComp_Settings'.default.HitSoundVolume;
-  bCPMAStyleHitsounds = class'UTComp_Settings'.default.bCPMAStyleHitsounds;
-  CPMAPitchModifier = class'UTComp_Settings'.default.CPMAPitchModifier;
-  SavedSpectateSpeed = class'UTComp_Settings'.default.SavedSpectateSpeed;
-  bUseDefaultScoreBoard = class'UTComp_Settings'.default.bUseDefaultScoreBoard;
-  bShowSelfInTeamOverlay = class'UTComp_Settings'.default.bShowSelfInTeamOverlay;
-  bEnableEnhancedNetCode = class'UTComp_Settings'.default.bEnableEnhancedNetCode;
-  bEnableColoredNamesOnEnemies = class'UTComp_Settings'.default.bEnableColoredNamesOnEnemies;
-
-  ballowcoloredmessages = class'UTComp_Settings'.default.ballowcoloredmessages;
-  bEnableColoredNamesInTalk = class'UTComp_Settings'.default.bEnableColoredNamesInTalk;
-
-  LoadedEnemySound = Sound(DynamicLoadObject(class'UTComp_Settings'.default.EnemySound, class'Sound', True));
-  LoadedFriendlySound = Sound(DynamicLoadObject(class'UTComp_Settings'.default.FriendlySound, class'Sound', True));
-
-
-
-
-  CurrentSelectedColoredName = class'UTComp_Settings'.default.CurrentSelectedColoredName;
-  for(i=0; i<ArrayCount(ColorName); i++)
-  {
-      ColorName[i] = class'UTComp_Settings'.default.ColorName[i];
-  }
-  ColoredName =  class'UTComp_Settings'.default.ColoredName;*/
 }
 
 simulated function PostBeginPlay()
 {
+
     Super.PostBeginPlay();
+    Log("PostBeginPlayKevin");
+    loadSettings();
     AssignStatNames();
     ChangeDeathMessageOrder();
 }
@@ -317,7 +307,7 @@ simulated function InitializeStuff()
             class'UTComp_Settings'.default.RedTeammateModelName=class'xGame.xPawn'.default.PlacedCharacterName;
             class'UTComp_xPawn'.static.staticsaveconfig();
         }
-        class'UTComp_Settings'.Static.StaticSaveConfig();
+        SaveSettings();
     }
     MatchHudColor();
     GetMapList();
@@ -332,9 +322,9 @@ simulated function InitializeScoreboard()
        if(class'UTComp_Settings'.default.bUseDefaultScoreboard)
        {
            if(GameReplicationInfo.bTeamGame)
-               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardTDM", class'Class'));
+               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv03.UTComp_ScoreBoardTDM", class'Class'));
            else
-               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardDM", class'Class'));
+               NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv03.UTComp_ScoreBoardDM", class'Class'));
            ClientChangedScoreboard=True;
         }
    }
@@ -342,9 +332,9 @@ simulated function InitializeScoreboard()
    {
        //TODO: SCOREBOARD
        //if (Level.Game.IsA('UTComp_xCTFGame'))
-       //    NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoardCTF", class'Class'));
+       //    NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv03.UTComp_ScoreBoardCTF", class'Class'));
        //else
-           NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv01.UTComp_ScoreBoard", class'Class'));
+           NewScoreboardClass=class<Scoreboard>(DynamicLoadObject("UTCompCTFv03.UTComp_ScoreBoard", class'Class'));
    }
    if(myHUD!=None && NewScoreBoardClass!=None)
         myHUD.SetScoreBoardClass( NewScoreboardClass);
@@ -704,18 +694,18 @@ exec function StatNext()
     local int i;
     local utcomp_pri startPRI;
 
-    if(gameREplicationInfo == None)
+    if (gameREplicationInfo == None)
        return;
 
     startPRI = currentStatDraw;
 
-    if(currentStatDraw == None)
+    if (currentStatDraw == None)
     {
-        for(i=0; i<GameReplicationInfo.PRIArray.length; i++)
+        for (i = 0; i < GameReplicationInfo.PRIArray.length; i++)
         {
-            pri = GameREplicationInfo.PRIArray[i];
-            uPRI = class'UTComp_Util'.static.GetUTCompPRI(GameREplicationInfo.PRIArray[i]);
-            if(uPRI!=None && uPRI!=UTCompPRI && !PRI.bBot && !pri.bOnlySpectator)
+            pri = GameReplicationInfo.PRIArray[i];
+            uPRI = class'UTComp_Util'.static.GetUTCompPRI(GameReplicationInfo.PRIArray[i]);
+            if (uPRI!=None && uPRI!=UTCompPRI && !PRI.bBot && !pri.bOnlySpectator)
             {
                currentStatDraw=uPRI;
                break;
@@ -724,46 +714,87 @@ exec function StatNext()
     }
     else
     {
-        for(i=0; i<GameReplicationInfo.PRIArray.length; i++)
+        for (i = 0; i < GameReplicationInfo.PRIArray.length; i++)
         {
           uPRI = class'UTComp_Util'.static.GetUTCompPRI(GameREplicationInfo.PRIArray[i]);
           pri = GameREplicationInfo.PRIArray[i];
-          if(bUseNext && !PRI.bBot && !pri.bOnlySpectator)
+          if (bUseNext && !PRI.bBot && !pri.bOnlySpectator)
           {
               currentStatDraw=uPRI;
               bUseNext=false;
               break;
           }
-          if(currentStatDraw==uPRI)
+          if (currentStatDraw==uPRI)
               bUseNext=true;
        }
-       if(bUseNext)
+
+       if (bUseNext)
        {
-           for(i=0; i<GameReplicationInfo.PRIArray.length; i++)
+           for (i = 0; i < GameReplicationInfo.PRIArray.length; i++)
            {
                 uPRI = class'UTComp_Util'.static.GetUTCompPRI(GameREplicationInfo.PRIArray[i]);
                 pri = GameREplicationInfo.PRIArray[i];
-                if(!PRI.bBot && !pri.bOnlySpectator)
+                if (!PRI.bBot && !pri.bOnlySpectator)
                     currentStatDraw=uPRI;
                 break;
            }
        }
     }
 
-    if(startPRI!=None && currentStatDraw == startPRI)
+    if (startPRI != None && currentStatDraw == startPRI)
     {
         currentStatDraw=none;
         StatNext();
         return;
     }
-    if(UTCompPRI!= currentStatDraw && currentStatDraw!=None)
+    if (UTCompPRI != currentStatDraw && currentStatDraw != None)
         RequestStats(currentStatDraw);
 }
 
-simulated function REquestStats(UTComp_PRI uPRI)
+/**
+  This is called in on the server. It thens executes SendCTFStats on the client that requested the stats.
+  */
+simulated function RequestCTFStats(UTComp_PRI uPRI)
 {
+  local string S;
+
+  if (uPRI == None)
+    return;
+
+  S = uPRI.FlagGrabs@uPRI.FlagCaps@uPRI.FlagPickups@uPRI.FlagKills@uPRI.FlagSaves@uPRI.FlagDenials@uPRI.Assists@uPRI.Covers@uPRI.CoverSpree@uPRI.Seals@uPRI.SealSpree@uPRI.DefKills;
+  SendCTFStats(S, uPRI);
+}
+
+/**
+  Receives S from the server and sets the values to the local uPRI in order to display the stats.
+  */
+simulated function SendCTFStats(string S, UTComp_PRI uPRI)
+{
+    local array<string> parts;
+
+    Split(S, " ", Parts);
+
+    uPRI.FlagGrabs=int(Parts[0]);
+    uPRI.FlagCaps=int(Parts[1]);
+    uPRI.FlagPickups=int(Parts[2]);
+    uPRI.FlagKills=int(Parts[3]);
+    uPRI.FlagSaves=int(Parts[4]);
+    uPRI.FlagDenials=int(Parts[5]);
+    uPRI.Assists=int(Parts[6]);
+    uPRI.Covers=int(Parts[7]);
+    uPRI.CoverSpree=int(Parts[8]);
+    uPRI.Seals=int(Parts[9]);
+    uPRI.SealSpree=int(Parts[10]);
+    uPRI.DefKills=int(Parts[11]);
+}
+
+simulated function RequestStats(UTComp_PRI uPRI)
+{
+  
+
     local string S;
     local int i;
+
 
     if(uPRI == None)
        return;
@@ -836,7 +867,6 @@ simulated function REquestStats(UTComp_PRI uPRI)
 simulated function SendPickups(string S, UTComp_PRI uPRI)
 {
     local array<string> parts;
-    //log("getting pickups");
 
     Split(S, " ", Parts);
 
@@ -1376,7 +1406,7 @@ exec function SetSavedSpectateSpeed(float F)
    class'UTComp_Settings'.default.SavedSpectateSpeed=F;
   // SavedSpectateSpeed=F;
    SetSpectateSpeed(F);
-   class'UTComp_Settings'.static.staticSaveConfig();
+   SaveSettings();
 }
 
 exec function NextSuperWeapon()
@@ -1942,7 +1972,7 @@ exec function SetName(coerce string S)
    SetColoredNameOldStyle(Left(S, 20));
    class'UTComp_Settings'.default.CurrentSelectedColoredName=255;
  //  CurrentSelectedColoredName=255;
-   class'UTComp_Settings'.static.staticSaveConfig();staticsaveconfig();
+   SaveSettings();staticsaveconfig();
 }
 
 exec function SetNameNoReset(coerce string S)
@@ -2094,7 +2124,7 @@ simulated function SetColoredNameOldStyleCustom(optional string S2, optional int
  //   Log(default.ColoredName[CustomColors].SavedColor[0].R@default.ColoredName[CustomColors].SavedColor[0].G@default.ColoredName[CustomColors].SavedColor[0].B);
     for(k=0; k<20; k++)
         class'UTComp_Settings'.default.ColorName[k]=class'UTComp_Settings'.default.ColoredName[CustomColors].SavedColor[k];
-    class'UTComp_Settings'.static.StaticSaveConfig();
+    SaveSettings();
     for(k=1; k<=Len(S2); k++)
     {
         numdoatonce=1;
@@ -2121,7 +2151,7 @@ simulated function SetShowSelf(Bool b)
 {
    // bShowSelfInTeamOverlay=b;
     class'UTComp_Settings'.default.bShowSelfInTeamOverlay=b;
-    class'UTComp_Settings'.static.staticSaveConfig();staticsaveconfig();
+    SaveSettings();staticsaveconfig();
     if(UTCompPRI!=None)
         UTCompPRI.SetShowSelf(b);
 }
@@ -2804,7 +2834,7 @@ function bool ComboDisabled(class<Combo> ComboClass)
 //Override to modify suicide timer
 exec function Suicide()
 {
-  if ((Pawn != None) && (Level.TimeSeconds - Pawn.LastStartTime > class'UTCompCTFv01.MutUTComp'.Default.SuicideInterval)) {
+  if ((Pawn != None) && (Level.TimeSeconds - Pawn.LastStartTime > class'UTCompCTFv03.MutUTComp'.Default.SuicideInterval)) {
     Pawn.Suicide();
   }
 }
@@ -2855,8 +2885,8 @@ state PlayerMousing extends Spectating
 defaultproperties
 {
 
-   UTCompMenuClass="UTCompCTFv01.UTComp_Menu_OpenedMenu"
-   UTCompVotingMenuClass="UTCompCTFv01.UTComp_Menu_VoteInProgress"
+   UTCompMenuClass="UTCompCTFv03.UTComp_Menu_OpenedMenu"
+   UTCompVotingMenuClass="UTCompCTFv03.UTComp_Menu_VoteInProgress"
    redmessagecolor=(B=64,G=64,R=255,A=255)
    greenmessagecolor=(B=128,G=255,R=128,A=255)
    bluemessagecolor=(B=255,G=192,R=64,A=255)

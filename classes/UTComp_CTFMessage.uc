@@ -36,15 +36,15 @@ static simulated function ClientReceive(
 	switch (Switch)
 	{
 		case 5: // Cover spree - guitarsound for player, spreesound for all
-			Log("Cover spree!");
+			//Log("Cover spree!");
 			if (RelatedPRI_1 == P.PlayerReplicationInfo)
 			{
-				Log("Cover spree! sound");
+				//Log("Cover spree! sound");
 				P.PlayAnnouncement(default.CoverSpreeSound, 1, True);
 			}
 			else 
 			{
-				Log("Cover spree! beep");
+				//Log("Cover spree! beep");
 				P.PlayBeepSound();
 			}
 			break;
@@ -94,7 +94,7 @@ static function string GetString(
 defaultproperties
 {
 	//defaults
-	CoverSpreeSound=Sound'UTCompCTFv01.Sounds.CoverSpreeSound'
+	CoverSpreeSound=Sound'UTCompCTFv03.Sounds.CoverSpreeSound'
 
 	CoveredMsg="covered the flagcarrier!"
 	YouCoveredMsg="You covered the flagcarrier!"
